@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Marten" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
+  </ItemGroup>
+</Project>
