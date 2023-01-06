@@ -8,11 +8,22 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />
+    <ProjectReference Include="..\HB.SharedObject\HB.SharedObject.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Marten" />
+    <None Remove="Card\" />
+    <None Remove="Customer\" />
+    <None Remove="Transaction\" />
+    <None Remove="Payment\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Card\" />
+    <Folder Include="Customer\" />
+    <Folder Include="Transaction\" />
+    <Folder Include="Payment\" />
   </ItemGroup>
 </Project>

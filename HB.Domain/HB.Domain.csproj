@@ -11,6 +11,7 @@
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL.Design" />
     <None Remove="Microsoft.EntityFrameworkCore.Tools" />
+    <None Remove="Marten" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\" />
@@ -22,5 +23,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
   </ItemGroup>
 </Project>

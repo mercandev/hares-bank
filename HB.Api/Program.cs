@@ -3,6 +3,10 @@ using HB.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Marten;
+using HB.Service.Card;
+using HB.Service.Customer;
+using HB.Service.Transaction;
+using HB.Service.Payment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +16,14 @@ builder.Services.AddEntityFrameworkNpgsql()
     .AddDbContext<HbContext>(opt => opt.UseNpgsql(connectionString?
     .ToString(), o => { o.MigrationsAssembly("HB.Api"); }));
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddMarten(x => { x.Connection(connectionString); });
 
-builder.Services.AddScoped<IInformationService, InformationService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICardService, CardService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore

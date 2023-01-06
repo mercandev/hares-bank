@@ -36,6 +36,7 @@
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL.Design" />
     <None Remove="Newtonsoft.Json" />
     <None Remove="Marten" />
+    <None Remove="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HB.Domain\HB.Domain.csproj">
@@ -44,5 +45,11 @@
     <ProjectReference Include="..\HB.Service\HB.Service.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
+    <ProjectReference Include="..\HB.SharedObject\HB.SharedObject.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>
