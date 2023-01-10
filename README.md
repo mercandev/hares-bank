@@ -4,7 +4,7 @@
 
 > So? 😂
 
-##What is Hares Bank? 🐰
+## What is Hares Bank? 🐰
 
 1. The purpose of this API is a fake bank API that I run simultaneously to be a good application on my way to learn swift.
 
