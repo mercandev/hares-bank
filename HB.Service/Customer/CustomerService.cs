@@ -4,6 +4,7 @@ using Marten;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using HB.SharedObject;
+using AutoMapper;
 
 namespace HB.Service.Customer
 {
@@ -12,12 +13,19 @@ namespace HB.Service.Customer
         private readonly HbContext? _hBContext;
         private readonly IDocumentSession _documentSession;
         private readonly IQuerySession _querySession;
+        private readonly IMapper _mapper;
 
-        public CustomerService(HbContext hbContext, IDocumentSession documentSession, IQuerySession querySession)
+        public CustomerService(
+            HbContext hbContext,
+            IDocumentSession documentSession,
+            IQuerySession querySession,
+            IMapper mapper
+            )
         {
             this._hBContext = hbContext;
             this._documentSession = documentSession;
             this._querySession = querySession;
+            this._mapper = mapper;
         }
 
         public List<Customers>? GetCustomers()
@@ -87,8 +95,8 @@ namespace HB.Service.Customer
 
             var address = _hBContext?.Address.Where(x => x.CustomerId == customerResult.Id).FirstOrDefault();
 
-            return new CustomerInformationViewModel();
-            /*
+            var accountResult = _mapper.Map<List<AccountsViewModel>>(result);
+
             return new CustomerInformationViewModel
             {
                 Name = customerResult.Name,
@@ -105,10 +113,8 @@ namespace HB.Service.Customer
                     Id = address.Id,
                     AddressExplanation = address.AddressExplanation
                 },
-                Accounts = new AccountsViewModel { }
+                Accounts = accountResult
             };
-            */
-
         }
     }
 }

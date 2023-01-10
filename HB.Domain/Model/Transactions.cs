@@ -1,17 +1,15 @@
 ﻿using System;
+using System.ComponentModel;
 using Marten.Schema;
 
 namespace HB.Domain.Model
 {
-	public record class Transactions
-	{
+	public class Transactions : MartenBaseModel
+    {
         public Transactions()
         {
             Id = Guid.NewGuid();
         }
-
-        [Identity]
-        public Guid Id { get; set; }
 
 		public string? Explanation { get; set; }
 		public int CustomerId { get; set; }
@@ -19,17 +17,35 @@ namespace HB.Domain.Model
 		public Guid CardId { get; set; }
 		public decimal Amount { get; set; }
 		public TransactionsType TransactionsType { get; set; }
-		public DateTime CreatedDate { get; set; }
+		public ProccessType ProccessType { get; set; }
 	}
 
 	public enum TransactionsType
 	{
+		[Description("Havale")]
         Remitment = 1,
-		Payment = 2,
+
+        [Description("Ödeme")]
+        Payment = 2,
+
+        [Description("Kurum")]
         Corporation = 3,
+
+        [Description("Bilinmeyen")]
         Indefinite = 4,
-        Witdraw = 5
+
+        [Description("Çekim")]
+        Withdraw = 5
     }
+
+	public enum ProccessType
+	{
+        [Description("Gelen Ödeme")]
+        Incoming = 1,
+
+        [Description("Giden Ödeme")]
+        Outgoid = 2
+	}
 	
 }
 

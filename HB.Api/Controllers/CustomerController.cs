@@ -35,6 +35,10 @@ namespace HB.Api.Controllers
         public Customers? PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
         => _customerService.CreateCustomer(createCustomerViewModel);
 
+        [HttpPost]
+        public CustomerInformationViewModel? PostLoginCustomer(string email, string password)
+        => _customerService.CustomerLogin(email,password);
+
 
     }
 }

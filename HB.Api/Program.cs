@@ -7,6 +7,7 @@ using HB.Service.Card;
 using HB.Service.Customer;
 using HB.Service.Transaction;
 using HB.Service.Payment;
+using HB.Service.Engine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 
+builder.Services.AddAutoMapper(typeof(AutoMapperRegister).Assembly);
 
 // Add services to the container.
 

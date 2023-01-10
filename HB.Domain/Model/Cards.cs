@@ -3,15 +3,12 @@ using Marten.Schema;
 
 namespace HB.Domain.Model
 {
-    public record class Cards
+    public class Cards : MartenBaseModel
 	{
 		public Cards()
 		{
 			Id = Guid.NewGuid();
 		}
-
-		[Identity]
-		public Guid Id { get; set; }
 
 		public int CustomerId { get; set; }
 		public string? CardNumber { get; set; }
@@ -23,14 +20,13 @@ namespace HB.Domain.Model
 		public bool IsCardBlocked { get; set; }
 		public decimal CardLimit { get; set; }
 		public decimal CardCurrentAmount { get; set; }
-		public bool IsActive { get; set; }
-		public DateTime CreatedDate { get; set; }
 	}
 
 	public enum CardPaymentType
 	{
 		MasterCard = 1,
-		Visa = 2
+		Visa = 2,
+		Troy = 3
 	}
 
 	public enum CardType
