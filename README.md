@@ -10,7 +10,7 @@
 
 2. Application uses PostgreSQL as DB. In addition, I installed the [Marten](https://martendb.io/) plugin for Document DB, which also uses PostgreSQL.
 
-3. The application will additionally use the JWT infrastructure for security. (soon)
+3. The application will additionally use the JWT infrastructure for security.
 
 4. It will use Firebase for push notification and storage operations. (soon)
 
