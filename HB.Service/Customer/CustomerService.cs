@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using HB.SharedObject;
 using AutoMapper;
+using System.Security.Claims;
+using HB.Service.Engine;
+using Microsoft.Extensions.Options;
 
 namespace HB.Service.Customer
 {
@@ -14,18 +17,21 @@ namespace HB.Service.Customer
         private readonly IDocumentSession _documentSession;
         private readonly IQuerySession _querySession;
         private readonly IMapper _mapper;
+        private readonly IOptions<JwtModel> _options;
 
         public CustomerService(
             HbContext hbContext,
             IDocumentSession documentSession,
             IQuerySession querySession,
-            IMapper mapper
+            IMapper mapper,
+            IOptions<JwtModel> options
             )
         {
             this._hBContext = hbContext;
             this._documentSession = documentSession;
             this._querySession = querySession;
             this._mapper = mapper;
+            this._options = options;
         }
 
         public List<Customers>? GetCustomers()
@@ -79,9 +85,9 @@ namespace HB.Service.Customer
             return new Customers();
         }
 
-        public CustomerInformationViewModel CustomerLogin(string email, string password)
+        public CustomerInformationViewModel CustomerInformation(int customerId)
         {
-            var customerResult = _hBContext.Customers.Where(x => x.Email == email && x.Password == password).FirstOrDefault();
+            var customerResult = _hBContext.Customers.Where(x => x.Id == customerId).FirstOrDefault();
 
             if (customerResult == null)
             {
@@ -115,6 +121,23 @@ namespace HB.Service.Customer
                 },
                 Accounts = accountResult
             };
+        }
+
+        public string CustomerLogin(string email, string password)
+        {
+            var customerResult = _hBContext.Customers.Where(x => x.Email == email && x.Password == password).FirstOrDefault();
+
+            if (customerResult == null)
+            {
+                throw new Exception("Customer not found!");
+            }
+
+            var claims = new[]
+            {
+                new Claim("CustomerId", customerResult.Id.ToString()),
+            };
+
+            return new JwtSecurity().CreateJwtToken(claims,_options.Value);
         }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using HB.Domain.Model;
 using HB.Service;
 using HB.Service.Customer;
 using HB.SharedObject;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HB.Api.Controllers
@@ -36,9 +39,13 @@ namespace HB.Api.Controllers
         => _customerService.CreateCustomer(createCustomerViewModel);
 
         [HttpPost]
-        public CustomerInformationViewModel? PostLoginCustomer(string email, string password)
-        => _customerService.CustomerLogin(email,password);
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public CustomerInformationViewModel? CustomerInformation(int customerId)
+        => _customerService.CustomerInformation(customerId);
 
+        [HttpPost]
+        public string? PostLoginCustomer(string username, string password)
+        => _customerService.CustomerLogin(username, password);
 
     }
 }
