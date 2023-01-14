@@ -9,8 +9,8 @@ namespace HB.Service.Customer
         List<Customers>? GetCustomers();
         List<Accounts?> GetCustomerAccounts(int customerId);
         Customers? CreateCustomer(CreateCustomerViewModel createCustomerViewModel);
-        CustomerInformationViewModel CustomerInformation(int customerId);
-        string CustomerLogin(string email, string password);
+        ReturnState<object> CustomerInformation(int customerId);
+        ReturnState<object> CustomerLogin(string email, string password);
     }
 }
 

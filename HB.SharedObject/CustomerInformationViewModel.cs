@@ -32,6 +32,7 @@ namespace HB.SharedObject
 		public string? Name { get; set; }
 		public decimal Amount { get; set; }
 		public int CurrencyId { get; set; }
+		public string? Iban { get; set; }
 	}
 }
 

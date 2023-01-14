@@ -40,12 +40,12 @@ namespace HB.Api.Controllers
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public CustomerInformationViewModel? CustomerInformation(int customerId)
+        public ReturnState<object> CustomerInformation(int customerId)
         => _customerService.CustomerInformation(customerId);
 
         [HttpPost]
-        public string? PostLoginCustomer(string username, string password)
-        => _customerService.CustomerLogin(username, password);
+        public ReturnState<object> PostLoginCustomer(string email, string password)
+        => _customerService.CustomerLogin(email, password);
 
     }
 }

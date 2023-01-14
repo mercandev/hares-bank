@@ -9,16 +9,11 @@ namespace HB.Service.Engine
 {
 	public class AutoMapperRegister : Profile
 	{
-        #region Constructors
-
-       
         public AutoMapperRegister()
         {
             CreateMap<Accounts, AccountsViewModel>().ReverseMap();
             CreateMap<AccountsViewModel, Accounts>().ReverseMap();
         }
-
-        #endregion
     }
 }
 

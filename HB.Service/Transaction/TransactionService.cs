@@ -1,7 +1,9 @@
 ﻿using System;
 using AutoMapper;
 using HB.Domain.Model;
+using HB.SharedObject;
 using Marten;
+using Microsoft.VisualBasic;
 
 namespace HB.Service.Transaction
 {
@@ -26,7 +28,13 @@ namespace HB.Service.Transaction
             return true;
         }
 
+        public ReturnState<object> ListTransactionsByCustomerId(int customerId)
+        {
+            var result = _querySession.Query<Transactions>().Where(x => x.CustomerId == customerId).ToList();
 
+            return new ReturnState<object>(result);
+
+        }
     }
 }
 

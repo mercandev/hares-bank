@@ -85,7 +85,7 @@ namespace HB.Service.Customer
             return new Customers();
         }
 
-        public CustomerInformationViewModel CustomerInformation(int customerId)
+        public ReturnState<object> CustomerInformation(int customerId)
         {
             var customerResult = _hBContext.Customers.Where(x => x.Id == customerId).FirstOrDefault();
 
@@ -103,7 +103,7 @@ namespace HB.Service.Customer
 
             var accountResult = _mapper.Map<List<AccountsViewModel>>(result);
 
-            return new CustomerInformationViewModel
+            var customerInformationResult = new CustomerInformationViewModel
             {
                 Name = customerResult.Name,
                 Surname = customerResult.Surname,
@@ -121,9 +121,12 @@ namespace HB.Service.Customer
                 },
                 Accounts = accountResult
             };
+
+            return new ReturnState<object>(customerInformationResult);
+
         }
 
-        public string CustomerLogin(string email, string password)
+        public ReturnState<object> CustomerLogin(string email, string password)
         {
             var customerResult = _hBContext.Customers.Where(x => x.Email == email && x.Password == password).FirstOrDefault();
 
@@ -137,8 +140,13 @@ namespace HB.Service.Customer
                 new Claim("CustomerId", customerResult.Id.ToString()),
             };
 
-            return new JwtSecurity().CreateJwtToken(claims,_options.Value);
+            var returnModel = new JwtReturnViewModel { Token = new JwtSecurity().CreateJwtToken(claims, _options.Value) };
+
+            return new ReturnState<object>(returnModel);
         }
+
     }
 }
+
+
 

@@ -20,7 +20,7 @@ namespace HB.Domain.Model
 		public ProccessType ProccessType { get; set; }
 	}
 
-	public enum TransactionsType
+	public enum TransactionsType 
 	{
 		[Description("Havale")]
         Remitment = 1,
