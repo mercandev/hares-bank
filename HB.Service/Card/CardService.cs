@@ -1,5 +1,7 @@
 ﻿using System;
 using HB.Domain.Model;
+using HB.Service.Engine;
+using HB.SharedObject;
 using Marten;
 
 namespace HB.Service.Card
@@ -45,10 +47,10 @@ namespace HB.Service.Card
             return _querySession.Query<Cards>().Where(x => x.Id == cardId).ToList();
         }
 
-        public Cards? ListCardsByCustomerId(int? customerId)
+        public ReturnState<object> ListCardsByCustomerId(int? customerId)
         {
-            return _querySession.Query<Cards>().Where(x => x.CustomerId == customerId).FirstOrDefault();
-            
+            var result = _querySession.Query<Cards>().Where(x => x.CustomerId == customerId).ToList();
+            return new ReturnState<object>(result);
         }
 
         public Cards? RandomEmptyCard(CardType cardType)

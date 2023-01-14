@@ -16,9 +16,10 @@ namespace HB.Domain.Model
 		public int BranchOfficesId { get; set; }
 		public int CurrencyId { get; set; }
         public int CustomersId { get; set; }
+		public string? Iban { get; set; }
 
-        //MAPPING
-        [ForeignKey("CustomersId")]
+		//MAPPING
+		[ForeignKey("CustomersId")]
         public virtual Customers? Customers { get; set; }
 
         [ForeignKey("BranchOfficesId")]
