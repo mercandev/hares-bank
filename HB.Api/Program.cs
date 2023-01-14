@@ -12,6 +12,9 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Net;
+using HB.SharedObject;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -82,13 +85,45 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddCors(p => p.AddPolicy("CorsApp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
 var app = builder.Build();
+
+app.UseExceptionHandler(appError =>
+{
+    appError.Run(async context =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+
+        if (contextFeature != null)
+        {
+            if (contextFeature.Error is HbBusinessException || contextFeature.Error is Exception)
+            {
+                await context.Response.WriteAsync(
+                    new ReturnState<object>(null)
+                    {
+                        Status = HttpStatusCode.InternalServerError,
+                        ErrorMessage = contextFeature.Error.Message
+
+                    }.ToString());
+            }
+        }
+    });
+});
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("CorsApp");
 
 app.UseAuthorization();
 

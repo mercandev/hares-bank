@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HB.Domain.Model;
 using HB.Service;
 using HB.Service.Card;
+using HB.SharedObject;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 
@@ -30,7 +31,7 @@ namespace HB.Api.Controllers
         }
 
         [HttpGet]
-        public Cards? GetCustomerCard(int customerId)
+        public ReturnState<object> GetCustomerCard(int customerId)
         {
             return _cardService.ListCardsByCustomerId(customerId);
         }
