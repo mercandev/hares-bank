@@ -12,6 +12,8 @@ namespace HB.Service.Card
         Cards RandomEmptyCard(CardType cardType);
         bool AssignmentCardForCustomer(int customerId, Guid cardId);
         List<Cards> GetCardForCardId(Guid cardId);
+        ReturnState<object> GenerateIbanNumber();
+        ReturnState<object> GenerateCard();
     }
 }
 

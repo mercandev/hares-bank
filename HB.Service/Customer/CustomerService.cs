@@ -8,6 +8,7 @@ using AutoMapper;
 using System.Security.Claims;
 using HB.Service.Engine;
 using Microsoft.Extensions.Options;
+using HB.Service.Helpers;
 
 namespace HB.Service.Customer
 {
@@ -75,7 +76,8 @@ namespace HB.Service.Customer
                 BranchOfficesId = createCustomerViewModel.BranchOfficesId,
                 Name = createCustomerViewModel.AccountName,
                 CurrencyId = (int)createCustomerViewModel.CurrencyId,
-                CustomersId = customer.Id
+                CustomersId = customer.Id,
+                Iban = GeneratorHelper.IbanGenerator()
             };
 
             var account = _hBContext.Add(accountModel);

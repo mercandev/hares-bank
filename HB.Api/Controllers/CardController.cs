@@ -60,6 +60,17 @@ namespace HB.Api.Controllers
             return _cardService.AssignmentCardForCustomer(customerId , cardId);
         }
 
+        [HttpPost]
+        public ReturnState<object> GenerateIbanNumber()
+        {
+            return _cardService.GenerateIbanNumber();
+        }
+
+        [HttpPost]
+        public ReturnState<object> GenerateCard()
+        {
+            return _cardService.GenerateCard();
+        }
     }
 }
 

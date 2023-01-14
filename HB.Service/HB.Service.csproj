@@ -21,6 +21,7 @@
     <None Remove="Engine\" />
     <None Remove="Helpers\" />
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <None Remove="Const\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -35,5 +36,6 @@
     <Folder Include="Payment\" />
     <Folder Include="Engine\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Const\" />
   </ItemGroup>
 </Project>

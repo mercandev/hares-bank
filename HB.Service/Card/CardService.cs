@@ -1,6 +1,7 @@
 ﻿using System;
 using HB.Domain.Model;
 using HB.Service.Engine;
+using HB.Service.Helpers;
 using HB.SharedObject;
 using Marten;
 
@@ -40,6 +41,20 @@ namespace HB.Service.Card
         public List<Cards> EmptyCardList()
         {
            return _querySession.Query<Cards>().Where(x => x.CustomerId == 0).ToList();
+        }
+
+        public ReturnState<object> GenerateCard()
+        {
+            var result = GeneratorHelper.CardGenerator();
+
+            return new ReturnState<object>(result);
+        }
+
+        public ReturnState<object> GenerateIbanNumber()
+        {
+            var result = GeneratorHelper.IbanGenerator();
+
+            return new ReturnState<object>(result);
         }
 
         public List<Cards> GetCardForCardId(Guid cardId)
