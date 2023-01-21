@@ -8,5 +8,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure\HB.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="CardViewModel\" />
+    <None Remove="CustomerViewModel\" />
+    <None Remove="TransactionViewModel\" />
+    <None Remove="PaymentViewModel\" />
+    <None Remove="AccountViewModel\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CardViewModel\" />
+    <Folder Include="CustomerViewModel\" />
+    <Folder Include="TransactionViewModel\" />
+    <Folder Include="PaymentViewModel\" />
+    <Folder Include="AccountViewModel\" />
   </ItemGroup>
 </Project>

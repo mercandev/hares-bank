@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />
     <ProjectReference Include="..\HB.SharedObject\HB.SharedObject.csproj" />
+    <ProjectReference Include="..\HB.Infrastructure\HB.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Marten" />
@@ -22,6 +23,8 @@
     <None Remove="Helpers\" />
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <None Remove="Const\" />
+    <None Remove="Log\" />
+    <None Remove="User\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -37,5 +40,7 @@
     <Folder Include="Engine\" />
     <Folder Include="Helpers\" />
     <Folder Include="Const\" />
+    <Folder Include="Log\" />
+    <Folder Include="User\" />
   </ItemGroup>
 </Project>

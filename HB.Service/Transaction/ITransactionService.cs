@@ -6,8 +6,8 @@ namespace HB.Service.Transaction
 {
 	public interface ITransactionService
 	{
-		bool CreateTransaction(Transactions transaction);
-		ReturnState<object> ListTransactionsByCustomerId(int customerId);
+        ReturnState<object> CreateTransaction(Transactions transaction);
+		ReturnState<object> ListTransactionsByCustomerId(int customerId, DateTime startDate, DateTime endDate);
 	}
 }
 

@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using AutoMapper;
 using HB.Domain.Model;
 using HB.SharedObject;
+using HB.SharedObject.CustomerViewModel;
 
 namespace HB.Service.Engine
 {

@@ -4,11 +4,14 @@ using Marten;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using HB.SharedObject;
+using HB.SharedObject.CustomerViewModel;
 using AutoMapper;
 using System.Security.Claims;
 using HB.Service.Engine;
 using Microsoft.Extensions.Options;
 using HB.Service.Helpers;
+using HB.Infrastructure.Jwt;
+using HB.Infrastructure.Exceptions;
 
 namespace HB.Service.Customer
 {
@@ -35,18 +38,8 @@ namespace HB.Service.Customer
             this._options = options;
         }
 
-        public List<Customers>? GetCustomers()
-        =>  _hBContext?.Customers.Include("Accounts").ToList();
-        
 
-        public List<Accounts?> GetCustomerAccounts(int customerId)
-        => _hBContext?.Accounts.Where(x => x.Customers.Id == customerId)
-               .Include("Customers")
-               .Include("BranchOffices")
-               .ToList();
-
-
-        public Customers? CreateCustomer(CreateCustomerViewModel createCustomerViewModel)
+        public ReturnState<object> CreateCustomer(CreateCustomerViewModel createCustomerViewModel)
         {
             var customerModel = new Customers
             {
@@ -84,11 +77,16 @@ namespace HB.Service.Customer
 
             _hBContext.SaveChanges();
 
-            return new Customers();
+            return new ReturnState<object>(true);
         }
 
-        public ReturnState<object> CustomerInformation(int customerId)
+        public ReturnState<object> CustomerInformation(int? customerId)
         {
+            if (customerId == default || customerId ==null)
+            {
+                throw new Exception("CustomerId is not null!");
+            }
+
             var customerResult = _hBContext.Customers.Where(x => x.Id == customerId).FirstOrDefault();
 
             if (customerResult == null)
@@ -134,12 +132,13 @@ namespace HB.Service.Customer
 
             if (customerResult == null)
             {
-                throw new Exception("Customer not found!");
+                throw new HbBusinessException("Customer not found!");
             }
 
             var claims = new[]
             {
                 new Claim("CustomerId", customerResult.Id.ToString()),
+                new Claim(ClaimTypes.Role , "Customer"),
             };
 
             var returnModel = new JwtReturnViewModel { Token = new JwtSecurity().CreateJwtToken(claims, _options.Value) };

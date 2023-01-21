@@ -1,5 +1,5 @@
 ﻿using System;
-namespace HB.Service.Engine
+namespace HB.Infrastructure.Jwt
 {
 	public class JwtModel
     {

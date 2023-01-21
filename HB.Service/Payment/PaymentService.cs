@@ -5,6 +5,7 @@ using HB.Service.Transaction;
 using HB.SharedObject;
 using Marten;
 using Microsoft.EntityFrameworkCore;
+using HB.SharedObject.PaymentViewModel;
 
 namespace HB.Service.Payment
 {
@@ -53,7 +54,7 @@ namespace HB.Service.Payment
 
                 if (!accountAmountCheck)
                 {
-                    throw new Exception("insufficient balance"); 
+                    throw new Exception("Insufficient balance"); 
                 }
 
                 _transactionService.CreateTransaction(

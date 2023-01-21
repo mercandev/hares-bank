@@ -2,6 +2,7 @@
 using HB.Domain.Model;
 using HB.Service.Const;
 using HB.SharedObject;
+using HB.SharedObject.CardViewModel;
 
 namespace HB.Service.Helpers
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using HB.Domain.Model;
 
-namespace HB.SharedObject
+namespace HB.SharedObject.CustomerViewModel
 {
 	public class CustomerInformationViewModel
 	{

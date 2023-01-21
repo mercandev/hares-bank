@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Service", "HB.Service\HB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.SharedObject", "HB.SharedObject\HB.SharedObject.csproj", "{7B3CF03C-18A7-4602-A6D1-1FA4F0BB39C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HB.Infrastructure", "HB.Infrastructure\HB.Infrastructure.csproj", "{AECDD908-ABD4-41DC-89D0-A9AF6E4E6EDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7B3CF03C-18A7-4602-A6D1-1FA4F0BB39C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B3CF03C-18A7-4602-A6D1-1FA4F0BB39C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B3CF03C-18A7-4602-A6D1-1FA4F0BB39C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AECDD908-ABD4-41DC-89D0-A9AF6E4E6EDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AECDD908-ABD4-41DC-89D0-A9AF6E4E6EDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AECDD908-ABD4-41DC-89D0-A9AF6E4E6EDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AECDD908-ABD4-41DC-89D0-A9AF6E4E6EDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,6 +20,7 @@ namespace HB.Domain.Model
 		public bool IsCardBlocked { get; set; }
 		public decimal CardLimit { get; set; }
 		public decimal CardCurrentAmount { get; set; }
+		public bool IsNfcActive { get; set; } = false;
 	}
 
 	public enum CardPaymentType

@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 
-namespace HB.Service.Engine
+namespace HB.Infrastructure.Jwt
 {
 	public class JwtSecurity
 	{

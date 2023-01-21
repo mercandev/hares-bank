@@ -1,5 +1,6 @@
 ﻿using System;
 using HB.SharedObject;
+using HB.SharedObject.PaymentViewModel;
 
 namespace HB.Service.Payment
 {
