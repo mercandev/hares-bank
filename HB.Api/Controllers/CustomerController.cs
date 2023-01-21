@@ -4,9 +4,13 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using HB.Domain.Model;
+using HB.Infrastructure.Extension;
 using HB.Service;
+using HB.Service.Const;
 using HB.Service.Customer;
+using HB.Service.Engine;
 using HB.SharedObject;
+using HB.SharedObject.CustomerViewModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,28 +28,20 @@ namespace HB.Api.Controllers
             this._customerService = customerService;
         }
 
-        [HttpGet]
-        public List<Customers>? GetCustomers()
-        => _customerService.GetCustomers();
-        
-
-        [HttpGet]
-        public List<Accounts?> GetCustomerAccounts(int customerId)
-        => _customerService.GetCustomerAccounts(customerId);
-
-
         [HttpPost]
-        public Customers? PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ALL_USERS)]
+        public ReturnState<object> PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
         => _customerService.CreateCustomer(createCustomerViewModel);
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public ReturnState<object> CustomerInformation(int customerId)
-        => _customerService.CustomerInformation(customerId);
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]
+        public ReturnState<object> CustomerInformation()
+        => _customerService.CustomerInformation(HttpContext.GetCurrentUserId());
 
         [HttpPost]
-        public ReturnState<object> PostLoginCustomer(string email, string password)
-        => _customerService.CustomerLogin(email, password);
+        [AllowAnonymous]
+        public ReturnState<object> PostLoginCustomer(LoginInputViewModel model)
+        => _customerService.CustomerLogin(model.Email, model.Password);
 
     }
 }

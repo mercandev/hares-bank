@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HB.Service.Payment;
+using HB.SharedObject.PaymentViewModel;
 using HB.SharedObject;
 using Microsoft.AspNetCore.Mvc;
 

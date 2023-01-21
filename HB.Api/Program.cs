@@ -15,6 +15,10 @@ using System.Text;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 using HB.SharedObject;
+using HB.Service.Log;
+using HB.Service.User;
+using HB.Infrastructure.Exceptions;
+using HB.Infrastructure.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -28,18 +32,25 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddMarten(x => { x.Connection(connectionString); });
 
+#region Register Services
+
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 
+#endregion
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 
 builder.Services.AddAutoMapper(typeof(AutoMapperRegister).Assembly);
+
+#region JwtAuthentication
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -56,8 +67,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 builder.Services.AddAuthorization();
 
+#endregion
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+#region Swagger JWT Authentication
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -86,12 +101,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+#endregion
+
 builder.Services.AddCors(p => p.AddPolicy("CorsApp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
 var app = builder.Build();
+
+#region CustomExceptionHandler
+
+var _logService = app.Services.CreateScope().ServiceProvider.GetRequiredService<ILogService>();
 
 app.UseExceptionHandler(appError =>
 {
@@ -105,8 +126,13 @@ app.UseExceptionHandler(appError =>
         {
             if (contextFeature.Error is HbBusinessException || contextFeature.Error is Exception)
             {
+                if (contextFeature.Error is HbBusinessException)
+                {
+                    await _logService.CreateErrorLog(Guid.NewGuid(), contextFeature.Error.Message);
+                }
+
                 await context.Response.WriteAsync(
-                    new ReturnState<object>(null)
+                    new ReturnState<object>(result: null)
                     {
                         Status = HttpStatusCode.InternalServerError,
                         ErrorMessage = contextFeature.Error.Message
@@ -116,6 +142,8 @@ app.UseExceptionHandler(appError =>
         }
     });
 });
+
+#endregion
 
 if (app.Environment.IsDevelopment())
 {

@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HB.Domain.Model;
+using HB.Infrastructure.Extension;
 using HB.Service;
 using HB.Service.Card;
+using HB.Service.Const;
+using HB.Service.Engine;
 using HB.SharedObject;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 
@@ -24,53 +29,15 @@ namespace HB.Api.Controllers
             this._cardService = cardService;
         }
 
-        [HttpPost]
-        public async Task<bool> PostCreateCard(Cards cards)
-        {
-            return await _cardService.AddCard(cards);
-        }
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ALL_USERS)]
         [HttpGet]
-        public ReturnState<object> GetCustomerCard(int customerId)
-        {
-            return _cardService.ListCardsByCustomerId(customerId);
-        }
-
-        [HttpGet]
-        public List<Cards>? GetEmptyCardList()
-        {
-            return _cardService.EmptyCardList();
-        }
+        public ReturnState<object> GetEmptyCardList()
+            => _cardService.EmptyCardList();
 
         [HttpPost]
-        public List<Cards> PostCardsFromCardId(Guid cardId)
-        {
-            return _cardService.GetCardForCardId(cardId);
-        }
-
-        [HttpGet]
-        public Cards RandomEmptyCard(CardType cardType)
-        {
-            return _cardService.RandomEmptyCard(cardType);
-        }
-
-        [HttpPost]
-        public bool AssignmentCardForCustomer(int customerId, Guid cardId)
-        {
-            return _cardService.AssignmentCardForCustomer(customerId , cardId);
-        }
-
-        [HttpPost]
-        public ReturnState<object> GenerateIbanNumber()
-        {
-            return _cardService.GenerateIbanNumber();
-        }
-
-        [HttpPost]
-        public ReturnState<object> GenerateCard()
-        {
-            return _cardService.GenerateCard();
-        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]
+        public ReturnState<object> PostListCustomerCards()
+            => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
     }
 }
 
