@@ -15,6 +15,7 @@ namespace HB.Domain.Model
         public DbSet<Address> Address { get; set; }
         public DbSet<BranchOffices> BranchOffices { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<Documents> Documents { get; set; }
     }
 }
 

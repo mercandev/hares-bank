@@ -19,6 +19,8 @@ using HB.Service.Log;
 using HB.Service.User;
 using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
+using HB.Infrastructure.Engine;
+using HB.Service.Firebase;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -32,6 +34,8 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddMarten(x => { x.Connection(connectionString); });
 
+builder.Services.FirebaseAuthRegister(configuration);
+
 #region Register Services
 
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -40,6 +44,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 
 #endregion
@@ -50,58 +55,15 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 builder.Services.AddAutoMapper(typeof(AutoMapperRegister).Assembly);
 
-#region JwtAuthentication
+#region Register Swagger and Jwt
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateActor = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    };
-});
-builder.Services.AddAuthorization();
+builder.JwtAndSwaggerRegister();
 
 #endregion
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-#region Swagger JWT Authentication
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Description = "Bearer Authentication with JWT Token",
-        Type = SecuritySchemeType.Http
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Id = "Bearer",
-                    Type = ReferenceType.SecurityScheme
-                }
-            },
-            new List<string>()
-        }
-    });
-});
-
-#endregion
 
 builder.Services.AddCors(p => p.AddPolicy("CorsApp", builder =>
 {

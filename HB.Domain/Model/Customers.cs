@@ -20,5 +20,6 @@ namespace HB.Domain.Model
         public virtual BranchOffices? BranchOffices { get; set; }
 
         public ICollection<Accounts>? Accounts { get; set; }
+        public ICollection<Documents>? Documents { get; set; }
     }
 }

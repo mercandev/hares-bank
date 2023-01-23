@@ -9,6 +9,7 @@ using HB.Service;
 using HB.Service.Const;
 using HB.Service.Customer;
 using HB.Service.Engine;
+using HB.Service.Firebase;
 using HB.SharedObject;
 using HB.SharedObject.CustomerViewModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

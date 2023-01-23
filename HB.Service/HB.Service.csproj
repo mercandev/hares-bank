@@ -25,12 +25,19 @@
     <None Remove="Const\" />
     <None Remove="Log\" />
     <None Remove="User\" />
+    <None Remove="FirebaseAdmin" />
+    <None Remove="FirebaseAuthentication.net" />
+    <None Remove="FirebaseStorage.net" />
+    <None Remove="Enum\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
     <PackageReference Include="AutoMapper" Version="12.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
+    <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
+    <PackageReference Include="FirebaseAuthentication.net" Version="4.0.1" />
+    <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Card\" />
@@ -42,5 +49,6 @@
     <Folder Include="Const\" />
     <Folder Include="Log\" />
     <Folder Include="User\" />
+    <Folder Include="Enum\" />
   </ItemGroup>
 </Project>
