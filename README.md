@@ -12,5 +12,5 @@
 
 3. The application will additionally use the JWT infrastructure for security.
 
-4. It will use Firebase for push notification and storage operations. (soon)
+4. It will use Firebase for push notification (soon) and storage, auth. operations. (added)
 
