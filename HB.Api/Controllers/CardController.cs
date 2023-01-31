@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace HB.Api.Controllers
 {
     [ApiController]
@@ -38,6 +36,15 @@ namespace HB.Api.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> PostListCustomerCards()
             => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
+
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ADMIN)]
+        public async Task<ReturnState<object>> PostCreateRandomEmptyCard([FromBody] int count)
+            => await _cardService.PostCreateRandomEmptyCard(count);
+
+
+
     }
 }
 

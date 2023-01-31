@@ -3,9 +3,7 @@ namespace HB.SharedObject.FirebaseViewModel
 {
 	public class GetUsersDocumentViewModel
 	{
-		public GetUsersDocumentViewModel()
-		{
-		}
+		public List<string> FileList { get; set; }
 	}
 }
 

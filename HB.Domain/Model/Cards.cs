@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using Marten.Schema;
 
 namespace HB.Domain.Model
@@ -8,11 +9,13 @@ namespace HB.Domain.Model
 		public Cards()
 		{
 			Id = Guid.NewGuid();
+			IsActive = false;
 		}
 
 		public int CustomerId { get; set; }
+		public string CustomerName { get; set; }
 		public string? CardNumber { get; set; }
-		public int LastUseDate { get; set; }
+		public int LastUseMount { get; set; }
 		public int LastUseYear { get; set; }
 		public int Cvv { get; set; }
 		public CardPaymentType CardPaymentType { get; set; }
@@ -21,13 +24,17 @@ namespace HB.Domain.Model
 		public decimal CardLimit { get; set; }
 		public decimal CardCurrentAmount { get; set; }
 		public bool IsNfcActive { get; set; } = false;
+		public int AccountId { get; set; } = 0;
 	}
 
 	public enum CardPaymentType
 	{
-		MasterCard = 1,
-		Visa = 2,
-		Troy = 3
+        [Description("MasterCard")]
+        MasterCard = 1,
+        [Description("Visa")]
+        Visa = 2,
+        [Description("Troy")]
+        Troy = 3
 	}
 
 	public enum CardType
@@ -35,7 +42,6 @@ namespace HB.Domain.Model
 		DebitCard = 1,
 		CreditCard = 2
 	}
-
 }
 
 

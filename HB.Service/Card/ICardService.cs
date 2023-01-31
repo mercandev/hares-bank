@@ -8,6 +8,7 @@ namespace HB.Service.Card
 	{
         ReturnState<object> PostListCustomerCards(int? customerId);
         ReturnState<object> EmptyCardList();
+        Task<ReturnState<object>> PostCreateRandomEmptyCard(int? count);
     }
 }
 

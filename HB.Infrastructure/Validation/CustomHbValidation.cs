@@ -26,6 +26,7 @@ namespace HB.Infrastructure.Validation
             yield return "string";
             yield return "0";
             yield return "";
+            yield return null;
         }
     }
 

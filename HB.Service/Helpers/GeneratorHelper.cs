@@ -19,16 +19,39 @@ namespace HB.Service.Helpers
 
 		public static CardGeneratorViewModel CardGenerator()
 		{
-			var randomPaymentType = Enum.GetValues<CardPaymentType>();
+			var randomPaymentType = System.Enum.GetValues<CardPaymentType>();
+			var cardPaymentType = (CardPaymentType)randomPaymentType.GetValue(new Random().Next(randomPaymentType.Length));
 
             return new CardGeneratorViewModel {
-				CardNumber = DigitGenerator(16),
-				LastDate = new Random().Next(10, 25).ToString(),
-                LastYear = new Random().Next(25, 35).ToString(),
+                CardNumber = CardNumberCreate(cardPaymentType),
+				LastUseMount = new Random().Next(1, 12).ToString(),
+                LastUseYear = new Random().Next(25, 35).ToString(),
 				Cvv = DigitGenerator(3),
-				CardPaymentType = (CardPaymentType)randomPaymentType.GetValue(new Random().Next(randomPaymentType.Length))
+				CardPaymentType = cardPaymentType
 			};
 		}
+
+		private static string CardNumberCreate(CardPaymentType cardPayment)
+		{
+            var firstFourDigit = string.Empty;
+
+            if (cardPayment == CardPaymentType.MasterCard)
+            {
+                firstFourDigit = CardPaymentTypeConst.MASTERCARD.Split(";").ToList().PickRandom();
+            }
+
+            if (cardPayment == CardPaymentType.Visa)
+            {
+                firstFourDigit = CardPaymentTypeConst.VISA.Split(";").ToList().PickRandom();
+            }
+
+            if (cardPayment == CardPaymentType.Troy)
+            {
+                firstFourDigit = CardPaymentTypeConst.TROY.Split(";").ToList().PickRandom();
+            }
+
+            return firstFourDigit + DigitGenerator(14);
+        }
 
 		private static string DigitGenerator(int digit)
 		{
@@ -36,6 +59,14 @@ namespace HB.Service.Helpers
             for (var j = 0; j < digit; j++) result[j] = (char)(new Random().NextDouble() * 10 + 48);
 			return new string(result);
         }
-	}
+
+        private static T PickRandom<T>(this List<T> enumerable)
+        {
+            int index = new Random().Next(0, enumerable.Count());
+            return enumerable[index];
+        }
+
+		
+    }
 }
 
