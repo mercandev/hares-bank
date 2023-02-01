@@ -6,7 +6,9 @@ namespace HB.Service.Payment
 {
 	public interface IPaymentService
 	{
-		bool CreatePayment(CreatePaymentViewModel model);
-	}
+        ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model);
+        Task<ReturnState<object>> PostPaymentAccount();
+        Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model);
+    }
 }
 

@@ -23,28 +23,27 @@ namespace HB.Api.Controllers
         private readonly ICardService _cardService;
 
         public CardController(ICardService cardService)
-        {
-            this._cardService = cardService;
-        }
+        => this._cardService = cardService;
+        
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ALL_USERS)]
         [HttpGet]
         public ReturnState<object> GetEmptyCardList()
-            => _cardService.EmptyCardList();
+        => _cardService.EmptyCardList();
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> PostListCustomerCards()
-            => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
+        => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
 
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ADMIN)]
         public async Task<ReturnState<object>> PostCreateRandomEmptyCard([FromBody] int count)
-            => await _cardService.PostCreateRandomEmptyCard(count);
+        => await _cardService.PostCreateRandomEmptyCard(count);
 
 
-
+        
     }
 }
 

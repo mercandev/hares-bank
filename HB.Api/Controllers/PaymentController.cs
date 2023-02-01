@@ -6,6 +6,12 @@ using HB.Service.Payment;
 using HB.SharedObject.PaymentViewModel;
 using HB.SharedObject;
 using Microsoft.AspNetCore.Mvc;
+using HB.Infrastructure.Extension;
+using HB.Service.Const;
+using HB.SharedObject.TransactionViewModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace HB.Api.Controllers
 {
@@ -16,15 +22,16 @@ namespace HB.Api.Controllers
         private readonly IPaymentService _paymentService;
 
         public PaymentController(IPaymentService paymentService)
-        {
-            this._paymentService = paymentService;
-        }
+        => this._paymentService = paymentService;
 
         [HttpPost]
-        public bool CreatePayment(CreatePaymentViewModel model)
-        {
-            return _paymentService.CreatePayment(model);
-        }
+        public ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
+        => _paymentService.PostOnlinePaymentCheckCardInformation(model);
+
+        [HttpPost]
+        public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
+        => await _paymentService.PostOnlinePaymentCard(model);
+
     }
 }
 

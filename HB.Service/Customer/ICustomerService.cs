@@ -10,6 +10,7 @@ namespace HB.Service.Customer
         ReturnState<object> CreateCustomer(CreateCustomerViewModel createCustomerViewModel);
         ReturnState<object> CustomerInformation(int? customerId);
         ReturnState<object> CustomerLogin(string email, string password);
+        Task<ReturnState<object>> DelegateCardCustomer(int customerId, CardType cardType);
     }
 }
 

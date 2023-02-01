@@ -17,11 +17,17 @@ namespace HB.Service.Customer
 {
 	public class CustomerService : ICustomerService
 	{
+        #region Data Access
+
         private readonly HbContext? _hBContext;
         private readonly IDocumentSession _documentSession;
         private readonly IQuerySession _querySession;
         private readonly IMapper _mapper;
         private readonly IOptions<JwtModel> _options;
+
+        #endregion
+
+        #region Constructor
 
         public CustomerService(
             HbContext hbContext,
@@ -38,7 +44,9 @@ namespace HB.Service.Customer
             this._options = options;
         }
 
+        #endregion
 
+        #region Create Customer
         public ReturnState<object> CreateCustomer(CreateCustomerViewModel createCustomerViewModel)
         {
             var customerModel = new Customers
@@ -79,7 +87,9 @@ namespace HB.Service.Customer
 
             return new ReturnState<object>(true);
         }
+        #endregion
 
+        #region Customer Information
         public ReturnState<object> CustomerInformation(int? customerId)
         {
             if (customerId == default || customerId ==null)
@@ -125,15 +135,14 @@ namespace HB.Service.Customer
             return new ReturnState<object>(customerInformationResult);
 
         }
+        #endregion
 
+        #region Customer Login
         public ReturnState<object> CustomerLogin(string email, string password)
         {
             var customerResult = _hBContext.Customers.Where(x => x.Email == email && x.Password == password).FirstOrDefault();
 
-            if (customerResult == null)
-            {
-                throw new HbBusinessException("Customer not found!");
-            }
+            if (customerResult == null) throw new HbBusinessException("Customer not found!");
 
             var claims = new[]
             {
@@ -145,7 +154,36 @@ namespace HB.Service.Customer
 
             return new ReturnState<object>(returnModel);
         }
+        #endregion
 
+
+        public async Task<ReturnState<object>> DelegateCardCustomer(int customerId , CardType cardType)
+        {
+            if (customerId == default) throw new HbBusinessException("CustomerId cannot be null or default!");
+
+            var customerResult = _hBContext?.Accounts.Where(x => x.Customers.Id == customerId)
+               .Include("Customers")
+               .Include("BranchOffices")
+               .FirstOrDefault();
+
+            if (customerResult == null) throw new HbBusinessException("Customer not found!");
+
+            var emptyRandomCard = _querySession.Query<Cards>()
+                .Where(x => !x.IsActive && x.CustomerName == null).ToList().PickRandom();
+
+            if (emptyRandomCard == null) throw new HbBusinessException("Blank card not found! Please produce new cards!");
+
+            emptyRandomCard.CustomerId = customerResult.Customers.Id;
+            emptyRandomCard.CustomerName = $"{customerResult.Customers.Name} {customerResult.Customers.Surname}";
+            emptyRandomCard.CardType = cardType;
+            emptyRandomCard.IsActive = true;
+            if (cardType == CardType.DebitCard) emptyRandomCard.AccountId = customerResult.Id;
+
+            _documentSession.Update(emptyRandomCard);
+            await _documentSession.SaveChangesAsync();
+
+            return new ReturnState<object>(true);
+        }
     }
 }
 

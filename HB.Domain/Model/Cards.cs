@@ -39,8 +39,10 @@ namespace HB.Domain.Model
 
 	public enum CardType
 	{
-		DebitCard = 1,
-		CreditCard = 2
+        [Description("Debit Card")]
+        DebitCard = 1,
+        [Description("Credit Card")]
+        CreditCard = 2
 	}
 }
 

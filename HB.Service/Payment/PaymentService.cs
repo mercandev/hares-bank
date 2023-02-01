@@ -1,11 +1,12 @@
 ﻿using System;
 using HB.Domain.Model;
+using HB.Infrastructure.Exceptions;
 using HB.Service.Helpers;
 using HB.Service.Transaction;
 using HB.SharedObject;
+using HB.SharedObject.PaymentViewModel;
 using Marten;
 using Microsoft.EntityFrameworkCore;
-using HB.SharedObject.PaymentViewModel;
 
 namespace HB.Service.Payment
 {
@@ -29,62 +30,108 @@ namespace HB.Service.Payment
             this._transactionService = transactionService;
         }
 
-        public bool CreatePayment(CreatePaymentViewModel model)
+        public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
         {
-            var accountInformation = new Accounts();
+            var card = CheckCardIsExist(model);
 
-            var customer = _hBContext.Customers.Where(x => x.Id == model.CustomerId)
-                .Include("Accounts")
-                .FirstOrDefault();
-
-            if (customer == null)
+            if (card.CardType == CardType.CreditCard)
             {
-                throw new Exception("Customer not found!");
+                var paymentAmount = card.CardCurrentAmount - model.Price;
+
+                if (paymentAmount < 0) throw new HbBusinessException("Insufficient card limit!");
+
+                card.CardCurrentAmount = paymentAmount;
+
+                _documentSession.Update(card);
+                await _documentSession.SaveChangesAsync();
+
+                var transaction = CreateTransactionCreditCard(card, model);
+
+                _transactionService.CreateTransaction(transaction);
+
+                return new ReturnState<object>(true);
             }
 
-            if (model.AccountId != default(int))
+            if (card.CardType == CardType.DebitCard)
             {
-               accountInformation = customer.Accounts.Where(x => x.Id == model.AccountId).FirstOrDefault();
-            }
-            
-            if (model.Amount != default && model.CardId == default(Guid))
-            {
-                //account payment
-                var accountAmountCheck = accountInformation.Amount - model.Amount < 0 ? false : true;
+                var customerAccount = _hBContext.Accounts.Where(x => x.Id == card.AccountId && x.IsActive).FirstOrDefault();
 
-                if (!accountAmountCheck)
-                {
-                    throw new Exception("Insufficient balance"); 
-                }
+                if (customerAccount == null) throw new HbBusinessException("User account not found!");
 
-                _transactionService.CreateTransaction(
-                    new Transactions
-                    {
-                        AccountId = accountInformation.Id,
-                        CustomerId = customer.Id,
-                        TransactionsType = model.TransactionsType,
-                        Explanation = $"{model.TransactionsType.GetEnumDescription()} - {ProccessType.Outgoid.GetEnumDescription()}",
-                        ProccessType = ProccessType.Outgoid,
-                        Amount = model.Amount,
-                    });
+                var paymentAmount = customerAccount.Amount - model.Price;
 
+                if (paymentAmount < 0) throw new HbBusinessException("Insufficient balance!");
 
-                accountInformation.Amount = accountInformation.Amount - model.Amount;
+                customerAccount.Amount = paymentAmount;
 
-                _hBContext.Accounts.Update(accountInformation);
-                _hBContext.SaveChanges();
+                _hBContext.Entry(customerAccount).State = EntityState.Modified;
+                await _hBContext.SaveChangesAsync();
 
-                return true;
-            }
-            else
-            {
-                //card payment 
+                var transaction = CreateTransactionDebidCard(card, model);
+
+                _transactionService.CreateTransaction(transaction);
+
+                return new ReturnState<object>(true);
             }
 
-
-            return true;
+            throw new HbBusinessException("Out-of-process!");
         }
 
+        public ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
+        {
+            CheckCardIsExist(model);
+
+            return new ReturnState<object>(true);
+        }
+
+        public Task<ReturnState<object>> PostPaymentAccount()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Cards CheckCardIsExist(PostCheckPaymentInformationViewModel model)
+        {
+            var cardInformationResult = _querySession.Query<Cards>()
+                .Where(
+                x =>
+                x.CardNumber == model.Card.CardNumber &&
+                x.CustomerName == model.Card.CustomerName &&
+                x.LastUseMount == model.Card.LastUseMount &&
+                x.LastUseYear == model.Card.LastUseYear &&
+                x.Cvv == model.Card.Cvv &&
+                x.IsActive).FirstOrDefault();
+
+            if (cardInformationResult == null) throw new HbBusinessException("Card not found!");
+
+            return cardInformationResult;
+        }
+
+        private Transactions CreateTransactionCreditCard(Cards card , PostCheckPaymentInformationViewModel model)
+        {
+            return new Transactions()
+            {
+                CardId = card.Id,
+                ProccessType = ProccessType.Outgoid,
+                TransactionsType = TransactionsType.OnlinePayment,
+                CustomerId = card.CustomerId,
+                Explanation = model.PaymentSource,
+                Amount = model.Price
+            };
+        }
+
+        private Transactions CreateTransactionDebidCard(Cards card, PostCheckPaymentInformationViewModel model)
+        {
+            return new Transactions()
+            {
+                CardId = card.Id,
+                ProccessType = ProccessType.Outgoid,
+                TransactionsType = TransactionsType.OnlinePayment,
+                CustomerId = card.CustomerId,
+                Explanation = model.PaymentSource,
+                Amount = model.Price,
+                AccountId = card.AccountId
+            };
+        }
     }
 }
 

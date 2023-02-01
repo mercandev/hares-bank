@@ -35,7 +35,10 @@ namespace HB.Domain.Model
         Indefinite = 4,
 
         [Description("Çekim")]
-        Withdraw = 5
+        Withdraw = 5,
+
+        [Description("Online Harcama")]
+        OnlinePayment = 6,
     }
 
 	public enum ProccessType

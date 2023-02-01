@@ -25,9 +25,7 @@ namespace HB.Api.Controllers
         private readonly ICustomerService _customerService;
 
         public CustomerController(ICustomerService customerService)
-        {
-            this._customerService = customerService;
-        }
+        => this._customerService = customerService;
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ALL_USERS)]
@@ -43,6 +41,12 @@ namespace HB.Api.Controllers
         [AllowAnonymous]
         public ReturnState<object> PostLoginCustomer(LoginInputViewModel model)
         => _customerService.CustomerLogin(model.Email, model.Password);
+
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ADMIN)]
+        public async Task<ReturnState<object>> DelegateCardCustomer([FromBody] int customerId, CardType cardType)
+        => await _customerService.DelegateCardCustomer(customerId,cardType);
 
     }
 }

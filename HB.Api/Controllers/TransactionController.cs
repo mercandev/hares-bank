@@ -22,9 +22,8 @@ namespace HB.Api.Controllers
         private readonly ITransactionService _transactionService;
 
         public TransactionController(ITransactionService transactionService)
-        {
-            this._transactionService = transactionService;
-        }
+        => this._transactionService = transactionService;
+        
 
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]

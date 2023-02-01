@@ -19,9 +19,8 @@ namespace HB.Api.Controllers
         private readonly IUserService _userService;
 
         public UserController(IUserService userService)
-        {
-            this._userService = userService;
-        }
+        => this._userService = userService;
+        
 
         [HttpPost]
         [AllowAnonymous]
