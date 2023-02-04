@@ -123,7 +123,7 @@ namespace HB.Service.Payment
 
                 _transactionService.CreateTransaction(transaction);
 
-                return new ReturnState<object>(true);
+                return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transaction.Id.ToString() , PaymentResult =true});
             }
 
             if (card.CardType == CardType.DebitCard)
@@ -145,7 +145,7 @@ namespace HB.Service.Payment
 
                 _transactionService.CreateTransaction(transaction);
 
-                return new ReturnState<object>(true);
+                return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transaction.Id.ToString(), PaymentResult = true });
             }
 
             throw new HbBusinessException("Out-of-process!");
