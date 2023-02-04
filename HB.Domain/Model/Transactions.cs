@@ -16,7 +16,8 @@ namespace HB.Domain.Model
 		public int AccountId { get; set; }
 		public Guid CardId { get; set; }
 		public decimal Amount { get; set; }
-		public TransactionsType TransactionsType { get; set; }
+        public decimal AvailableBalance { get; set; }
+        public TransactionsType TransactionsType { get; set; }
 		public ProccessType ProccessType { get; set; }
 	}
 
@@ -39,6 +40,12 @@ namespace HB.Domain.Model
 
         [Description("Online Harcama")]
         OnlinePayment = 6,
+
+        [Description("Iban ile Gönderim")]
+        PaymentWithIban = 7,
+
+        [Description("Iban ile Gönderim Komisyonu - Başka Banka")]
+        PaymentWithIbanCommission = 7,
     }
 
 	public enum ProccessType

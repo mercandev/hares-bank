@@ -19,6 +19,7 @@
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <None Remove="FirebaseAuthentication.net" />
     <None Remove="Swashbuckle.AspNetCore" />
+    <None Remove="Const\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\" />
@@ -27,6 +28,7 @@
     <Folder Include="Helpers\" />
     <Folder Include="Validation\" />
     <Folder Include="Extension\" />
+    <Folder Include="Const\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />

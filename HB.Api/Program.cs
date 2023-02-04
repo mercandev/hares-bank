@@ -46,6 +46,7 @@ builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
+builder.Services.Configure<Commission>(configuration.GetSection("Commission"));
 
 #endregion
 

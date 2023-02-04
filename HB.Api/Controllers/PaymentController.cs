@@ -32,6 +32,10 @@ namespace HB.Api.Controllers
         public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
         => await _paymentService.PostOnlinePaymentCard(model);
 
+        [HttpPost]
+        public async Task<ReturnState<object>> PostCreateIbanTransfer(PostSendMoneyWithIbanViewModel model)
+        => await _paymentService.CreateIbanTransfer(HttpContext.GetCurrentUserId(), model);
+
     }
 }
 

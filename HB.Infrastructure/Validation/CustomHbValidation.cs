@@ -8,7 +8,15 @@ namespace HB.Infrastructure.Validation
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            if (value.ToString() == ValidationControlWorlds().FirstOrDefault())
+            if (value is decimal)
+            {
+                if ((decimal)value <= 0M)
+                {
+                    throw new Exception($"{validationContext.DisplayName} cannot be under the zero!");
+                }
+            }
+
+            if ((string)value.ToString() == ValidationControlWorldsString().FirstOrDefault())
             {
                 throw new Exception($"{validationContext.DisplayName} cannot be empty or null!");
             }
@@ -21,13 +29,14 @@ namespace HB.Infrastructure.Validation
             throw new Exception($"{validationContext.DisplayName} cannot be empty or null!");
         }
 
-        private IEnumerable<string> ValidationControlWorlds()
+        private IEnumerable<string> ValidationControlWorldsString()
         {
             yield return "string";
             yield return "0";
             yield return "";
             yield return null;
         }
+
     }
 
    

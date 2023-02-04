@@ -29,6 +29,7 @@ namespace HB.Service.Engine
             CreateMap<Transactions, TransactionsResponseViewModel>()
                 .ForMember(dest => dest.TransactionsType, from => from.MapFrom(s => s.TransactionsType.GetEnumDescription()))
                 .ForMember(dest => dest.ProccessType, from => from.MapFrom(s => s.ProccessType.GetEnumDescription()));
+                
         }
     }
 }

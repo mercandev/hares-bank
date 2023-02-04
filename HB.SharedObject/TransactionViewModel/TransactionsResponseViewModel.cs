@@ -9,6 +9,7 @@ namespace HB.SharedObject.TransactionViewModel
 		public decimal Amount { get; set; }
 		public string TransactionsType { get; set; }
 		public string ProccessType { get; set; }
+		public decimal AvailableBalance { get; set; }
 		public DateTime CreatedDate { get; set; }
 	}
 }
