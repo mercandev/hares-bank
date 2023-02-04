@@ -8,6 +8,14 @@ namespace HB.Infrastructure.Validation
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value is int)
+            {
+                if ((int)value == default)
+                {
+                    throw new Exception($"{validationContext.DisplayName} cannot be default!");
+                }
+            }
+
             if (value is decimal)
             {
                 if ((decimal)value <= 0M)

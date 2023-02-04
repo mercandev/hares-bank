@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Transactions;
+using AutoMapper;
 using HB.Domain.Model;
 using HB.Infrastructure.Const;
 using HB.Infrastructure.Exceptions;
@@ -22,14 +24,15 @@ namespace HB.Service.Payment
         private readonly IQuerySession _querySession;
         private readonly ITransactionService _transactionService;
         private readonly IOptions<Commission> _options;
+        private readonly IMapper _mapper;
 
         public PaymentService(
             HbContext hbContext,
             IDocumentSession documentSession,
             IQuerySession querySession,
             ITransactionService transactionService,
-            IOptions<Commission> options
-            
+            IOptions<Commission> options,
+            IMapper mapper
             )
         {
             this._hBContext = hbContext;
@@ -37,6 +40,7 @@ namespace HB.Service.Payment
             this._querySession = querySession;
             this._transactionService = transactionService;
             this._options = options;
+            this._mapper = mapper;
         }
 
         public async Task<ReturnState<object>> CreateIbanTransfer(int customerId , PostSendMoneyWithIbanViewModel model)
@@ -89,6 +93,15 @@ namespace HB.Service.Payment
             }
 
             return new ReturnState<object>(true);
+        }
+
+        public ReturnState<object> GetOrganisations()
+        {
+            var result = _hBContext.Organisations.ToList();
+
+            var mapperResult = _mapper.Map<List<OrganisationsViewModel>>(result);
+
+            return new ReturnState<object>(mapperResult);
         }
 
         public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
@@ -145,6 +158,39 @@ namespace HB.Service.Payment
             return new ReturnState<object>(true);
         }
 
+        public ReturnState<object> PostPayInvoice(int customerId, InvoicePaymentViewModel model)
+        {
+            var accountInformation = _hBContext.Accounts.Where(x => x.CustomersId == customerId).FirstOrDefault();
+
+            if (accountInformation == null) throw new HbBusinessException("User not found!");
+
+            var organisation = _hBContext.Organisations.Where(x => x.Id == model.OrganisationId).FirstOrDefault();
+
+            var checkAmaount = accountInformation.Amount - organisation.InvoiceAmount;
+
+            if (checkAmaount <= 0M) throw new HbBusinessException("Insufficient balance!");
+
+            accountInformation.Amount = checkAmaount;
+
+            _hBContext.Entry(accountInformation).State = EntityState.Modified;
+            _hBContext.SaveChanges();
+
+            var invoicePayment = new InvoicePaymentTransactionViewModel
+            {
+                AccountId = accountInformation.Id,
+                Amount = organisation.InvoiceAmount,
+                AvailableBalance = checkAmaount,
+                CustomerId = accountInformation.CustomersId,
+                Explanation = $"{organisation.OrganisationType.GetEnumDescription()} - ({organisation.Name})"
+            };
+
+            var transactions = CreateTransactionInvoicePayment(invoicePayment);
+
+            _transactionService.CreateTransaction(transactions);
+
+            return new ReturnState<object>(true);
+        }
+
         private Cards CheckCardIsExist(PostCheckPaymentInformationViewModel model)
         {
             var cardInformationResult = _querySession.Query<Cards>()
@@ -197,6 +243,20 @@ namespace HB.Service.Payment
             {
                 ProccessType = ProccessType.Outgoid,
                 TransactionsType = model.TransactionsType,
+                CustomerId = model.CustomerId,
+                Explanation = model.Explanation,
+                Amount = model.Amount,
+                AvailableBalance = model.AvailableBalance,
+                AccountId = model.AccountId
+            };
+        }
+
+        private Transactions CreateTransactionInvoicePayment(InvoicePaymentTransactionViewModel model)
+        {
+            return new Transactions()
+            {
+                ProccessType = ProccessType.Outgoid,
+                TransactionsType = TransactionsType.Corporation,
                 CustomerId = model.CustomerId,
                 Explanation = model.Explanation,
                 Amount = model.Amount,

@@ -7,6 +7,7 @@ using HB.Service.Helpers;
 using HB.SharedObject;
 using HB.SharedObject.CardViewModel;
 using HB.SharedObject.CustomerViewModel;
+using HB.SharedObject.PaymentViewModel;
 using HB.SharedObject.TransactionViewModel;
 
 namespace HB.Service.Engine
@@ -29,7 +30,11 @@ namespace HB.Service.Engine
             CreateMap<Transactions, TransactionsResponseViewModel>()
                 .ForMember(dest => dest.TransactionsType, from => from.MapFrom(s => s.TransactionsType.GetEnumDescription()))
                 .ForMember(dest => dest.ProccessType, from => from.MapFrom(s => s.ProccessType.GetEnumDescription()));
-                
+
+            //Payment
+            CreateMap<Organisations, OrganisationsViewModel>()
+                .ForMember(dest => dest.OrganisationType, from => from.MapFrom(s => s.OrganisationType.GetEnumDescription()));
+
         }
     }
 }

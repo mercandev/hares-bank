@@ -9,6 +9,9 @@ namespace HB.Service.Payment
         ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model);
         Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model);
         Task<ReturnState<object>> CreateIbanTransfer(int customerId , PostSendMoneyWithIbanViewModel model);
+        ReturnState<object> GetOrganisations();
+        ReturnState<object> PostPayInvoice(int customerId, InvoicePaymentViewModel model);
+
 
     }
 }
