@@ -29,12 +29,12 @@ namespace HB.Api.Controllers
         => this._customerService = customerService;
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ALL_USERS)]
+        [AuthHb(Roles = UserRoles.ALL_STAFF)]
         public ReturnState<object> PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
         => _customerService.CreateCustomer(createCustomerViewModel);
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.CUSTOMER)]
+        [AuthHb(Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> CustomerInformation()
         => _customerService.CustomerInformation(HttpContext.GetCurrentUserId());
 
@@ -45,7 +45,7 @@ namespace HB.Api.Controllers
 
 
         [HttpPost]
-        [AuthHb(Roles = UserRoles.ALL_USERS)]
+        [AuthHb(Roles = UserRoles.CUSTOMER)]
         public async Task<ReturnState<object>> DelegateCardCustomer([FromBody] int customerId, CardType cardType)
         => await _customerService.DelegateCardCustomer(customerId,cardType);
 
