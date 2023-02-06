@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using HB.Domain.Model;
+using HB.Infrastructure.Authentication;
 using HB.Infrastructure.Extension;
 using HB.Service;
 using HB.Service.Const;
@@ -19,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HB.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]/[action]"), Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CustomerController : Controller
     {
         private readonly ICustomerService _customerService;
@@ -44,7 +45,7 @@ namespace HB.Api.Controllers
 
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = UserRoles.ADMIN)]
+        [AuthHb(Roles = UserRoles.ALL_USERS)]
         public async Task<ReturnState<object>> DelegateCardCustomer([FromBody] int customerId, CardType cardType)
         => await _customerService.DelegateCardCustomer(customerId,cardType);
 
