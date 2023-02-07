@@ -17,6 +17,7 @@
     <None Remove="PaymentViewModel\" />
     <None Remove="AccountViewModel\" />
     <None Remove="FirebaseViewModel\" />
+    <None Remove="AutoMapper" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CardViewModel\" />

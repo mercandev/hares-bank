@@ -141,6 +141,8 @@ namespace HB.Service.Payment
                 _hBContext.Entry(customerAccount).State = EntityState.Modified;
                 await _hBContext.SaveChangesAsync();
 
+                card.CardCurrentAmount = customerAccount.Amount;
+
                 var transaction = CreateTransactionDebidCard(card, model);
 
                 _transactionService.CreateTransaction(transaction);
