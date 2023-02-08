@@ -1,10 +1,8 @@
-### Hares Bank 🐇💸
 
-![](https://upload.wikimedia.org/wikipedia/commons/4/44/Lepus_europaeus_%28Causse_M%C3%A9jean%2C_Loz%C3%A8re%29-cropped.jpg)
 
-> So? 😂
+![hares-logo](https://user-images.githubusercontent.com/22862224/217651446-79be3d61-ed29-4137-b499-71d8a815f171.png)
 
-## What is Hares Bank? 🐰
+## What is Hares Bank? 🐇💸 
 
 1. The purpose of this API is a fake bank API that I run simultaneously to be a good application on my way to learn swift.
 
@@ -14,3 +12,4 @@
 
 4. It will use Firebase for push notification (soon) and storage, auth. operations. (added)
 
+5. ⚠️ Warning! This is just a scenario. Not suitable for real use! ⚠️
