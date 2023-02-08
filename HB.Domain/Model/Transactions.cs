@@ -19,9 +19,20 @@ namespace HB.Domain.Model
         public decimal AvailableBalance { get; set; }
         public TransactionsType TransactionsType { get; set; }
 		public ProccessType ProccessType { get; set; }
-	}
+        public ReceiptInformation ReceiptInformation { get; set; }
+    }
 
-	public enum TransactionsType 
+    public class ReceiptInformation
+    {
+        public string SenderName { get; set; }
+        public string SenderIban { get; set; }
+        public string ReciverName { get; set; }
+        public string ReciverIban { get; set; }
+        public string TransactionExplanation { get; set; }
+        public decimal Balance { get; set; }
+    }
+
+    public enum TransactionsType 
 	{
 		[Description("Havale")]
         Remitment = 1,

@@ -43,11 +43,14 @@ namespace HB.Service.Payment
             this._mapper = mapper;
         }
 
+        #region CreateIbanTransfer
         public async Task<ReturnState<object>> CreateIbanTransfer(int customerId , PostSendMoneyWithIbanViewModel model)
         {
             PaymentHelper.IbanValidation(model.Iban);
 
-            var userInformation = _hBContext.Accounts.Where(x => x.CustomersId == customerId).FirstOrDefault();
+            var userInformation = _hBContext.Accounts
+                .Include("Customers")
+                .Where(x => x.CustomersId == customerId).FirstOrDefault();
 
             if (userInformation == null) throw new HbBusinessException("User not found!");
 
@@ -74,9 +77,19 @@ namespace HB.Service.Payment
                 TransactionsType = TransactionsType.PaymentWithIban
             };
 
+            ReceiptInformation receiptInformationViewModel = new()
+            {
+                Balance = model.Price,
+                SenderIban = userInformation.Iban,
+                SenderName = $"{userInformation.Customers.Name} {userInformation.Customers.Surname}",
+                ReciverName = model.UserNameAndSurname,
+                ReciverIban = model.Iban,
+                TransactionExplanation = $"{model.UserNameAndSurname}'a iban ile para gönderimi. {model.Price}₺"
+            };
+
             if (isIbanHaresBankOwned != null)
             {
-                StartIbanPaymentComplate(userInformation , ibanTransactionModel , false);
+                StartIbanPaymentComplate(userInformation , ibanTransactionModel , receiptInformationViewModel,  false);
 
                 return new ReturnState<object>(true);
             }
@@ -85,16 +98,18 @@ namespace HB.Service.Payment
             {
                 if (i == 1) //commission
                 {
-                    StartIbanPaymentComplate(userInformation, ibanTransactionModel, true);
+                    StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationViewModel, true);
                     continue;
                 }
 
-                StartIbanPaymentComplate(userInformation, ibanTransactionModel, false);
+                StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationViewModel, false);
             }
 
             return new ReturnState<object>(true);
         }
+        #endregion
 
+        #region Organisations
         public ReturnState<object> GetOrganisations()
         {
             var result = _hBContext.Organisations.ToList();
@@ -103,7 +118,9 @@ namespace HB.Service.Payment
 
             return new ReturnState<object>(mapperResult);
         }
+        #endregion
 
+        #region OnlinePaymentCard
         public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
         {
             var card = CheckCardIsExist(model);
@@ -128,7 +145,9 @@ namespace HB.Service.Payment
 
             if (card.CardType == CardType.DebitCard)
             {
-                var customerAccount = _hBContext.Accounts.Where(x => x.Id == card.AccountId && x.IsActive).FirstOrDefault();
+                var customerAccount = _hBContext.Accounts
+                    .Include("Customers")
+                    .Where(x => x.Id == card.AccountId && x.IsActive).FirstOrDefault();
 
                 if (customerAccount == null) throw new HbBusinessException("User account not found!");
 
@@ -143,7 +162,17 @@ namespace HB.Service.Payment
 
                 card.CardCurrentAmount = customerAccount.Amount;
 
-                var transaction = CreateTransactionDebidCard(card, model);
+                ReceiptInformation receiptInformationViewModel = new()
+                {
+                    Balance = model.Price,
+                    SenderIban = customerAccount.Iban,
+                    SenderName = $"{customerAccount.Customers.Name} {customerAccount.Customers.Surname}",
+                    ReciverName = model.PaymentSource,
+                    ReciverIban = string.Empty,
+                    TransactionExplanation = $"{model.PaymentSource} online harcama tahsilatı. {model.Price}₺"
+                };
+
+                var transaction = CreateTransactionDebidCard(card, model, receiptInformationViewModel);
 
                 _transactionService.CreateTransaction(transaction);
 
@@ -152,6 +181,7 @@ namespace HB.Service.Payment
 
             throw new HbBusinessException("Out-of-process!");
         }
+        #endregion
 
         public ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
         {
@@ -160,9 +190,12 @@ namespace HB.Service.Payment
             return new ReturnState<object>(true);
         }
 
+        #region Invoice Payment
         public ReturnState<object> PostPayInvoice(int customerId, InvoicePaymentViewModel model)
         {
-            var accountInformation = _hBContext.Accounts.Where(x => x.CustomersId == customerId).FirstOrDefault();
+            var accountInformation = _hBContext.Accounts
+                .Include("Customers")
+                .Where(x => x.CustomersId == customerId).FirstOrDefault();
 
             if (accountInformation == null) throw new HbBusinessException("User not found!");
 
@@ -186,12 +219,23 @@ namespace HB.Service.Payment
                 Explanation = $"{organisation.OrganisationType.GetEnumDescription()} - ({organisation.Name})"
             };
 
-            var transactions = CreateTransactionInvoicePayment(invoicePayment);
+            ReceiptInformation receiptInformationViewModel = new()
+            {
+                Balance = organisation.InvoiceAmount,
+                SenderIban = accountInformation.Iban,
+                SenderName = $"{accountInformation.Customers.Name} {accountInformation.Customers.Surname}",
+                ReciverName = organisation.Name,
+                ReciverIban = organisation.Iban,
+                TransactionExplanation = $"{model.SubscriberNumber} abonelik için {organisation.Name} ücret tahsilatı. {organisation.InvoiceAmount}₺"
+            };
+
+            var transactions = CreateTransactionInvoicePayment(invoicePayment , receiptInformationViewModel);
 
             _transactionService.CreateTransaction(transactions);
 
             return new ReturnState<object>(true);
         }
+        #endregion
 
         private Cards CheckCardIsExist(PostCheckPaymentInformationViewModel model)
         {
@@ -210,6 +254,8 @@ namespace HB.Service.Payment
             return cardInformationResult;
         }
 
+        #region Transactions
+
         private Transactions CreateTransactionCreditCard(Cards card , PostCheckPaymentInformationViewModel model)
         {
             return new Transactions()
@@ -224,7 +270,7 @@ namespace HB.Service.Payment
             };
         }
 
-        private Transactions CreateTransactionDebidCard(Cards card, PostCheckPaymentInformationViewModel model)
+        private Transactions CreateTransactionDebidCard(Cards card, PostCheckPaymentInformationViewModel model , ReceiptInformation receiptModel)
         {
             return new Transactions()
             {
@@ -235,11 +281,12 @@ namespace HB.Service.Payment
                 Explanation = model.PaymentSource,
                 Amount = model.Price,
                 AvailableBalance = card.CardCurrentAmount,
-                AccountId = card.AccountId
+                AccountId = card.AccountId,
+                ReceiptInformation = receiptModel
             };
         }
 
-        private Transactions CreateTransactionIbanTransfer(IbanTransactionViewModel model)
+        private Transactions CreateTransactionIbanTransfer(IbanTransactionViewModel model , ReceiptInformation receiptInformation)
         {
             return new Transactions()
             {
@@ -249,11 +296,12 @@ namespace HB.Service.Payment
                 Explanation = model.Explanation,
                 Amount = model.Amount,
                 AvailableBalance = model.AvailableBalance,
-                AccountId = model.AccountId
+                AccountId = model.AccountId,
+                ReceiptInformation = receiptInformation
             };
         }
 
-        private Transactions CreateTransactionInvoicePayment(InvoicePaymentTransactionViewModel model)
+        private Transactions CreateTransactionInvoicePayment(InvoicePaymentTransactionViewModel model, ReceiptInformation receiptInformationModel)
         {
             return new Transactions()
             {
@@ -263,11 +311,14 @@ namespace HB.Service.Payment
                 Explanation = model.Explanation,
                 Amount = model.Amount,
                 AvailableBalance = model.AvailableBalance,
-                AccountId = model.AccountId
+                AccountId = model.AccountId,
+                ReceiptInformation = receiptInformationModel
             };
         }
 
-        private void StartIbanPaymentComplate(Accounts userInformation , IbanTransactionViewModel transactionInformation, bool isCommission)
+        #endregion
+
+        private void StartIbanPaymentComplate(Accounts userInformation , IbanTransactionViewModel transactionInformation, ReceiptInformation receiptInformation , bool isCommission)
         {
             if (isCommission)
             {
@@ -284,9 +335,13 @@ namespace HB.Service.Payment
             if (isCommission)
             {
                 transactionInformation.Amount = _options.Value.Rate;
+                receiptInformation.Balance = _options.Value.Rate;
+                receiptInformation.ReciverName = HB.Service.Const.PaymentIbanConst.HARES_BANK;
+                receiptInformation.ReciverIban = HB.Service.Const.PaymentIbanConst.HARES_BANK_IBAN;
+                receiptInformation.TransactionExplanation = $"{receiptInformation.SenderName}'a iban ile para gönderimi. (Komisyon kesintisi. -Hares Bank) {_options.Value.Rate}₺";
             }
 
-            var transaction = CreateTransactionIbanTransfer(transactionInformation);
+            var transaction = CreateTransactionIbanTransfer(transactionInformation , receiptInformation);
 
             _transactionService.CreateTransaction(transaction);
         }

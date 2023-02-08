@@ -8,7 +8,8 @@ namespace HB.Domain.Model
 		public string Name { get; set; }
 		public OrganisationType OrganisationType { get; set; }
 		public decimal InvoiceAmount { get; set; }
-	}
+        public string Iban { get; set; }
+    }
 
     public enum OrganisationType
 	{

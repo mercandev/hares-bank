@@ -29,6 +29,7 @@
     <None Remove="FirebaseAuthentication.net" />
     <None Remove="FirebaseStorage.net" />
     <None Remove="Enum\" />
+    <None Remove="File\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -50,5 +51,6 @@
     <Folder Include="Log\" />
     <Folder Include="User\" />
     <Folder Include="Enum\" />
+    <Folder Include="File\" />
   </ItemGroup>
 </Project>
