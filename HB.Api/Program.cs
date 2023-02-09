@@ -21,6 +21,8 @@ using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
 using HB.Infrastructure.Engine;
 using HB.Service.Firebase;
+using HB.Service.File;
+using PdfTurtleClientDotnet;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -45,8 +47,10 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 builder.Services.Configure<Commission>(configuration.GetSection("Commission"));
+builder.Services.AddPdfTurtle("https://pdfturtle.gaitzsch.dev");
 
 #endregion
 

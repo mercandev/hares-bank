@@ -38,12 +38,10 @@ namespace HB.Api.Controllers
         public ReturnState<object> PostListCustomerCards()
         => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
 
-
         [HttpPost]
         [AuthHb(Roles = UserRoles.ADMIN)]
         public async Task<ReturnState<object>> PostCreateRandomEmptyCard([FromBody] int count)
         => await _cardService.PostCreateRandomEmptyCard(count);
-
     }
 }
 

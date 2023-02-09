@@ -30,6 +30,18 @@
     <None Remove="FirebaseStorage.net" />
     <None Remove="Enum\" />
     <None Remove="File\" />
+    <None Remove="Polybioz.HtmlRenderer.PdfSharp.Core" />
+    <None Remove="Microsoft.AspNet.Mvc" />
+    <None Remove="Microsoft.AspNetCore.Mvc.Core" />
+    <None Remove="Select.HtmlToPdf.NetCore" />
+    <None Remove="PuppeteerSharp" />
+    <None Remove="Syncfusion.Pdf.Net.Core" />
+    <None Remove="NReco.PdfGenerator" />
+    <None Remove="NReco.PdfGenerator.LT" />
+    <None Remove="HtmlRenderer.Core" />
+    <None Remove="Select.HtmlToPdf" />
+    <None Remove="PugPDF.Core" />
+    <None Remove="PdfTurtleClientDotnet" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -39,6 +51,8 @@
     <PackageReference Include="FirebaseAdmin" Version="2.3.0" />
     <PackageReference Include="FirebaseAuthentication.net" Version="4.0.1" />
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="PdfTurtleClientDotnet" Version="2023.1.25.2030" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Card\" />
