@@ -57,16 +57,26 @@ namespace HB.Domain.Model
 
         [Description("Iban ile Gönderim Komisyonu - Başka Banka")]
         PaymentWithIbanCommission = 7,
+
+        [Description("Değerli Maden Alım")]
+        BuyyingCoal = 8,
+
+        [Description("Değerli Maden Satış")]
+        SellingCoal = 9,
+
     }
 
-	public enum ProccessType
+    public enum ProccessType
 	{
         [Description("Gelen Ödeme")]
         Incoming = 1,
 
         [Description("Giden Ödeme")]
-        Outgoid = 2
-	}
+        Outgoid = 2,
+
+        [Description("Kurum içi İşlem")]
+        InHouseTransaction = 3
+    }
 	
 }
 

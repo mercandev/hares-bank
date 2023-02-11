@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HB.Domain.Model
@@ -28,9 +29,16 @@ namespace HB.Domain.Model
 
 	public enum Currency
 	{
+		[Description("Türk Lirası")]
 		TRY = 1,
-		USD = 2,
-		EURO = 3
+        [Description("Dolar")]
+        USD = 2,
+        [Description("Euro")]
+        EURO = 3,
+        [Description("Altın")]
+        GOLD = 4,
+        [Description("Gümüş")]
+        SILVER = 5
 	}
 }
 

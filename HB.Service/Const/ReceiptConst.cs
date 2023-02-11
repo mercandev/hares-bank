@@ -155,7 +155,7 @@ namespace HB.Service.Const
 
 				<tr class=""details"">
 					<td>{6}</td>
-					<td>{7}</td>
+					<td>{7}₺</td>
 				</tr>
 			</table>
 			<br>

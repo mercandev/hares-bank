@@ -18,6 +18,7 @@
     <None Remove="AccountViewModel\" />
     <None Remove="FirebaseViewModel\" />
     <None Remove="AutoMapper" />
+    <None Remove="ExchangeViewModel\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CardViewModel\" />
@@ -26,5 +27,6 @@
     <Folder Include="PaymentViewModel\" />
     <Folder Include="AccountViewModel\" />
     <Folder Include="FirebaseViewModel\" />
+    <Folder Include="ExchangeViewModel\" />
   </ItemGroup>
 </Project>

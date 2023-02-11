@@ -7,6 +7,7 @@ using HB.Service.Helpers;
 using HB.SharedObject;
 using HB.SharedObject.CardViewModel;
 using HB.SharedObject.CustomerViewModel;
+using HB.SharedObject.ExchangeViewModel;
 using HB.SharedObject.PaymentViewModel;
 using HB.SharedObject.TransactionViewModel;
 
@@ -35,6 +36,13 @@ namespace HB.Service.Engine
             CreateMap<Organisations, OrganisationsViewModel>()
                 .ForMember(dest => dest.OrganisationType, from => from.MapFrom(s => s.OrganisationType.GetEnumDescription()));
 
+            //Excange
+            CreateMap<CurrencyDetail, ExchangeMappingResponseViewModel>()
+                .ForMember(dest => dest.Selling, from => from.MapFrom(s => s.satis))
+                .ForMember(dest => dest.Buying, from => from.MapFrom(s => s.alis))
+                .ForMember(dest => dest.Changing, from => from.MapFrom(s => s.degisim))
+                .ForMember(dest => dest.ChangingRate, from => from.MapFrom(s => s.d_oran))
+                .ForMember(dest => dest.ChangeingRoute, from => from.MapFrom(s => s.d_yon));
         }
     }
 }

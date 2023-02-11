@@ -12,6 +12,7 @@ using HB.Service.Customer;
 using HB.Service.Engine;
 using HB.Service.Firebase;
 using HB.SharedObject;
+using HB.SharedObject.AccountViewModel;
 using HB.SharedObject.CustomerViewModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +34,7 @@ namespace HB.Api.Controllers
         public ReturnState<object> PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
         => _customerService.CreateCustomer(createCustomerViewModel);
 
-        [HttpPost]
+        [HttpGet]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> CustomerInformation()
         => _customerService.CustomerInformation(HttpContext.GetCurrentUserId());
@@ -43,11 +44,25 @@ namespace HB.Api.Controllers
         public ReturnState<object> PostLoginCustomer(LoginInputViewModel model)
         => _customerService.CustomerLogin(model.Email, model.Password);
 
-
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public async Task<ReturnState<object>> DelegateCardCustomer([FromBody] int customerId, CardType cardType)
         => await _customerService.DelegateCardCustomer(customerId,cardType);
+
+        [HttpPost]
+        [AuthHb(Roles = UserRoles.CUSTOMER)]
+        public async Task<ReturnState<object>> CreateCustomerAccount(CreateAccountViewModel model)
+        => await _customerService.CreateAccount(HttpContext.GetCurrentUserId() , model);
+
+        [HttpPost]
+        [AuthHb(Roles = UserRoles.ALL_USERS)]
+        public async Task<ReturnState<object>> GetCoalsDetail(CoalDetailViewModel model)
+        => await _customerService.CoalInformation(model);
+
+        [HttpPost]
+        [AuthHb(Roles = UserRoles.CUSTOMER)]
+        public async Task<ReturnState<object>> BuyGold(ConvertMoneyToCoalViewModel model)
+        => await _customerService.BuyGold(HttpContext.GetCurrentUserId(), model);
 
     }
 }

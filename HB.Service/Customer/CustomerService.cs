@@ -12,6 +12,13 @@ using Microsoft.Extensions.Options;
 using HB.Service.Helpers;
 using HB.Infrastructure.Jwt;
 using HB.Infrastructure.Exceptions;
+using HB.SharedObject.AccountViewModel;
+using System.ComponentModel;
+using System.Reflection;
+using HB.SharedObject.ExchangeViewModel;
+using HB.Service.Const;
+using HB.Service.Transaction;
+using Microsoft.AspNetCore.SignalR;
 
 namespace HB.Service.Customer
 {
@@ -23,6 +30,7 @@ namespace HB.Service.Customer
         private readonly IDocumentSession _documentSession;
         private readonly IQuerySession _querySession;
         private readonly IMapper _mapper;
+        private readonly ITransactionService _transactionService;
         private readonly IOptions<JwtModel> _options;
 
         #endregion
@@ -34,6 +42,7 @@ namespace HB.Service.Customer
             IDocumentSession documentSession,
             IQuerySession querySession,
             IMapper mapper,
+            ITransactionService transactionService,
             IOptions<JwtModel> options
             )
         {
@@ -41,7 +50,110 @@ namespace HB.Service.Customer
             this._documentSession = documentSession;
             this._querySession = querySession;
             this._mapper = mapper;
+            this._transactionService = transactionService;
             this._options = options;
+        }
+        #endregion
+
+        #region Convert Money Coal
+        public async Task<ReturnState<object>> BuyGold(int customerId, ConvertMoneyToCoalViewModel model)
+        {
+            if (model.Price < 1M) throw new Exception("Price cannot under the 1.0!");
+
+            var customerAccount = _hBContext.Accounts
+                .Include("Customers")
+                .Where(x => x.CustomersId == customerId).ToList();
+
+            if (customerAccount == null) throw new Exception("Account not found!");
+
+            var coalAccount = customerAccount.Where(x => x.CurrencyId == (int)Currency.GOLD).FirstOrDefault();
+
+            if (coalAccount == null) throw new Exception("Coal account not found!");
+
+            var mainAccount = customerAccount.Where(x => x.Id == model.AccountId).FirstOrDefault();
+
+            var isAccountAmountEnough = mainAccount.Amount - model.Price;
+
+            if (isAccountAmountEnough < 0M) throw new Exception("Balance not enough!");
+
+            var goldAccount = customerAccount.Where(x => x.CurrencyId == (int)Currency.GOLD).FirstOrDefault();
+
+            var goldAmount = model.Price / model.CoalPrice;
+
+            var poundPrice = Math.Round(goldAmount, 5);
+
+            mainAccount.Amount = mainAccount.Amount - model.Price;
+
+            goldAccount.Amount = goldAccount.Amount + poundPrice;
+            goldAccount.UpdatedDate = DateTime.Now;
+
+            _hBContext.Entry(goldAccount).State = EntityState.Modified;
+            _hBContext.Entry(mainAccount).State = EntityState.Modified;
+            await _hBContext.SaveChangesAsync();
+
+            var transactions = GoldBuyyingTransaction(goldAccount, poundPrice, model.Price);
+
+            _transactionService.CreateTransaction(transactions);
+
+            return new ReturnState<object>(true);
+        }
+
+        #endregion
+
+        #region Coal Information
+
+        public async Task<ReturnState<object>> CoalInformation(CoalDetailViewModel model)
+        {
+            var exchangeResult = await RestRequestHelper<ExchangeResponseViewModel>.GetService(ExchangeConst.EXCHANGE_URL);
+
+            if (exchangeResult == null) throw new Exception("Exchange service return null!");
+
+            if (model.CoalId == (int)Coals.Gold)
+            {
+                var exchangeGoldResult = exchangeResult.GA;
+
+                var mapping = _mapper.Map<ExchangeMappingResponseViewModel>(exchangeGoldResult);
+
+                return new ReturnState<object>(mapping);
+            }
+
+            if (model.CoalId == (int)Coals.Silver)
+            {
+                var exchangeSilverResult = exchangeResult.GAG;
+
+                var mapping = _mapper.Map<ExchangeMappingResponseViewModel>(exchangeSilverResult);
+
+                return new ReturnState<object>(mapping);
+            }
+
+            throw new HbBusinessException("Out-of-process!");
+        }
+
+        #endregion
+
+        #region Create Account
+        public async Task<ReturnState<object>> CreateAccount(int customerId, CreateAccountViewModel model)
+        {
+            if (model.CurrencyId < 0 || model.CurrencyId > 5) throw new Exception("CurrencyId is not valid!");
+
+            var customerInformation = _hBContext?.Customers.Where(x => x.Id == customerId).FirstOrDefault();
+
+            if (customerInformation == null) throw new Exception("Customer not found!");
+
+            Accounts accounts = new()
+            {
+                BranchOfficesId = customerInformation.BranchOfficesId,
+                CurrencyId = model.CurrencyId,
+                Iban = GeneratorHelper.IbanGenerator(),
+                CustomersId = customerInformation.Id,
+                Name = $"{HbHelpers.GetEnumDescriptionIntToEnum((Currency)model.CurrencyId)} hesabım",
+                CreatedBy = customerInformation.Name
+            };
+
+            await _hBContext.AddAsync(accounts);
+            _hBContext.SaveChangesAsync();
+
+            return new ReturnState<object>(true);
         }
 
         #endregion
@@ -156,7 +268,7 @@ namespace HB.Service.Customer
         }
         #endregion
 
-
+        #region Delegate Card Customer
         public async Task<ReturnState<object>> DelegateCardCustomer(int customerId , CardType cardType)
         {
             if (customerId == default) throw new HbBusinessException("CustomerId cannot be null or default!");
@@ -184,6 +296,30 @@ namespace HB.Service.Customer
 
             return new ReturnState<object>(true);
         }
+
+
+        private Transactions GoldBuyyingTransaction(Accounts model, decimal goldPrice , decimal moneyPrice)
+        {
+            return new Transactions
+            {
+                AccountId = model.Id,
+                CustomerId = model.CustomersId,
+                ProccessType = ProccessType.InHouseTransaction,
+                TransactionsType = TransactionsType.BuyyingCoal,
+                Explanation = $"Altın Alım - Miktar: {goldPrice}",
+                ReceiptInformation = new ReceiptInformation
+                {
+                    Balance = moneyPrice,
+                    SenderIban = model.Iban,
+                    SenderName = $"{model.Customers.Name} {model.Customers.Surname}",
+                    ReciverName = PaymentIbanConst.HARES_BANK,
+                    ReciverIban = PaymentIbanConst.HARES_BANK_IBAN,
+                    TransactionExplanation = $"Hares Bank üzerinden altın alım. Miktar: {goldPrice}"
+                }
+            };
+        }
+
+        #endregion
     }
 }
 
