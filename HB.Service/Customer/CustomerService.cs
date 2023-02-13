@@ -19,6 +19,8 @@ using HB.SharedObject.ExchangeViewModel;
 using HB.Service.Const;
 using HB.Service.Transaction;
 using Microsoft.AspNetCore.SignalR;
+using HB.Infrastructure.DbContext;
+using HB.Infrastructure.Repository;
 
 namespace HB.Service.Customer
 {
@@ -32,6 +34,7 @@ namespace HB.Service.Customer
         private readonly IMapper _mapper;
         private readonly ITransactionService _transactionService;
         private readonly IOptions<JwtModel> _options;
+        private readonly IRepository<Customers> _customerRepository;
 
         #endregion
 
@@ -43,7 +46,8 @@ namespace HB.Service.Customer
             IQuerySession querySession,
             IMapper mapper,
             ITransactionService transactionService,
-            IOptions<JwtModel> options
+            IOptions<JwtModel> options,
+            IRepository<Customers> customerRepository
             )
         {
             this._hBContext = hbContext;
@@ -52,6 +56,7 @@ namespace HB.Service.Customer
             this._mapper = mapper;
             this._transactionService = transactionService;
             this._options = options;
+            this._customerRepository = customerRepository;
         }
         #endregion
 
@@ -252,7 +257,7 @@ namespace HB.Service.Customer
         #region Customer Login
         public ReturnState<object> CustomerLogin(string email, string password)
         {
-            var customerResult = _hBContext.Customers.Where(x => x.Email == email && x.Password == password).FirstOrDefault();
+            var customerResult = _customerRepository.All().Where(x => x.Email == email && x.Password == password).FirstOrDefault();
 
             if (customerResult == null) throw new HbBusinessException("Customer not found!");
 

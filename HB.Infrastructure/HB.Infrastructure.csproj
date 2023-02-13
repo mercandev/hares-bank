@@ -21,6 +21,11 @@
     <None Remove="Swashbuckle.AspNetCore" />
     <None Remove="Const\" />
     <None Remove="Authentication\" />
+    <None Remove="Repository\" />
+    <None Remove="Microsoft.EntityFrameworkCore" />
+    <None Remove="Enum\" />
+    <None Remove="DbContext\" />
+    <None Remove="MartenRepository\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\" />
@@ -31,6 +36,10 @@
     <Folder Include="Extension\" />
     <Folder Include="Const\" />
     <Folder Include="Authentication\" />
+    <Folder Include="Repository\" />
+    <Folder Include="Enum\" />
+    <Folder Include="DbContext\" />
+    <Folder Include="MartenRepository\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
@@ -39,5 +48,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
     <PackageReference Include="FirebaseAuthentication.net" Version="4.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />
   </ItemGroup>
 </Project>

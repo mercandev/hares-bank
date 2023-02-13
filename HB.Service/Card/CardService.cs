@@ -1,6 +1,7 @@
 ﻿using System;
 using AutoMapper;
 using HB.Domain.Model;
+using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Exceptions;
 using HB.Service.Engine;
 using HB.Service.Helpers;

@@ -23,6 +23,8 @@ using HB.Infrastructure.Engine;
 using HB.Service.Firebase;
 using HB.Service.File;
 using PdfTurtleClientDotnet;
+using HB.Infrastructure.Repository;
+using HB.Infrastructure.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -51,6 +53,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 builder.Services.Configure<Commission>(configuration.GetSection("Commission"));
 builder.Services.AddPdfTurtle("https://pdfturtle.gaitzsch.dev");
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped(typeof(IContext), typeof(Context));
 
 #endregion
 
@@ -69,46 +73,20 @@ builder.JwtAndSwaggerRegister();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+#region Cors
 
 builder.Services.AddCors(p => p.AddPolicy("CorsApp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+#endregion
+
 var app = builder.Build();
 
 #region CustomExceptionHandler
 
-var _logService = app.Services.CreateScope().ServiceProvider.GetRequiredService<ILogService>();
-
-app.UseExceptionHandler(appError =>
-{
-    appError.Run(async context =>
-    {
-        context.Response.ContentType = "application/json";
-
-        var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-
-        if (contextFeature != null)
-        {
-            if (contextFeature.Error is HbBusinessException || contextFeature.Error is Exception)
-            {
-                if (contextFeature.Error is HbBusinessException)
-                {
-                    await _logService.CreateErrorLog(Guid.NewGuid(), contextFeature.Error.Message);
-                }
-
-                await context.Response.WriteAsync(
-                    new ReturnState<object>(result: null)
-                    {
-                        Status = HttpStatusCode.InternalServerError,
-                        ErrorMessage = contextFeature.Error.Message
-
-                    }.ToString());
-            }
-        }
-    });
-});
+app.UseExceptionHandlerRegister();
 
 #endregion
 

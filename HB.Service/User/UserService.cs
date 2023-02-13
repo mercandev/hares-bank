@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using AutoMapper;
 using HB.Domain.Model;
+using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
 using HB.Service.Engine;
