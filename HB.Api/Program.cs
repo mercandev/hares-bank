@@ -25,6 +25,9 @@ using HB.Service.File;
 using PdfTurtleClientDotnet;
 using HB.Infrastructure.Repository;
 using HB.Infrastructure.DbContext;
+using HB.Infrastructure.MartenRepository;
+using HB.Infrastructure;
+using HB.Infrastructure.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -50,11 +53,15 @@ builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddTransient<IUserInformation, UserInformation>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 builder.Services.Configure<Commission>(configuration.GetSection("Commission"));
 builder.Services.AddPdfTurtle("https://pdfturtle.gaitzsch.dev");
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped(typeof(IContext), typeof(Context));
+builder.Services.AddScoped(typeof(IMartenRepository<>), typeof(MartenRepository<>));
+builder.Services.AddHttpContextAccessor();
+
 
 #endregion
 

@@ -21,6 +21,7 @@ using HB.Service.Transaction;
 using Microsoft.AspNetCore.SignalR;
 using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Repository;
+using HB.Infrastructure.Authentication;
 
 namespace HB.Service.Customer
 {
@@ -35,6 +36,7 @@ namespace HB.Service.Customer
         private readonly ITransactionService _transactionService;
         private readonly IOptions<JwtModel> _options;
         private readonly IRepository<Customers> _customerRepository;
+        private readonly IUserInformation _userInformation;
 
         #endregion
 
@@ -47,7 +49,8 @@ namespace HB.Service.Customer
             IMapper mapper,
             ITransactionService transactionService,
             IOptions<JwtModel> options,
-            IRepository<Customers> customerRepository
+            IRepository<Customers> customerRepository,
+            IUserInformation userInformation
             )
         {
             this._hBContext = hbContext;
@@ -57,6 +60,7 @@ namespace HB.Service.Customer
             this._transactionService = transactionService;
             this._options = options;
             this._customerRepository = customerRepository;
+            this._userInformation = userInformation;
         }
         #endregion
 
@@ -207,14 +211,9 @@ namespace HB.Service.Customer
         #endregion
 
         #region Customer Information
-        public ReturnState<object> CustomerInformation(int? customerId)
+        public ReturnState<object> CustomerInformation()
         {
-            if (customerId == default || customerId ==null)
-            {
-                throw new Exception("CustomerId is not null!");
-            }
-
-            var customerResult = _hBContext.Customers.Where(x => x.Id == customerId).FirstOrDefault();
+            var customerResult = _hBContext.Customers.Where(x => x.Id == _userInformation.GetUserInformation().CustomerId).FirstOrDefault();
 
             if (customerResult == null)
             {

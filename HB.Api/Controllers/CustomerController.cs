@@ -37,7 +37,7 @@ namespace HB.Api.Controllers
         [HttpGet]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> CustomerInformation()
-        => _customerService.CustomerInformation(HttpContext.GetCurrentUserId());
+        => _customerService.CustomerInformation();
 
         [HttpPost]
         [AllowAnonymous]

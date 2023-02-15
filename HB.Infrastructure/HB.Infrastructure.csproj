@@ -26,6 +26,7 @@
     <None Remove="Enum\" />
     <None Remove="DbContext\" />
     <None Remove="MartenRepository\" />
+    <None Remove="Marten" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\" />
@@ -49,6 +50,7 @@
     <PackageReference Include="FirebaseAuthentication.net" Version="4.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
+    <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HB.Domain\HB.Domain.csproj" />

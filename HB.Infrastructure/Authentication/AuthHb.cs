@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Claims;
+using HB.Infrastructure.Const;
 using HB.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -25,7 +26,7 @@ namespace HB.Infrastructure.Authentication
                 if (!claimPayload.Intersect(splitUser).Any())
                 {
                     context.Result = new ForbidResult();
-                }
+                }               
             }
         }
     }

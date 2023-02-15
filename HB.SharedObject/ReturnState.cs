@@ -15,6 +15,12 @@ namespace HB.SharedObject
 			Data = (T?)result;
 		}
 
+		public ReturnState(HttpStatusCode statusCode , string errorMessage)
+		{
+			Status = statusCode;
+			ErrorMessage = errorMessage;
+		}
+
 		public HttpStatusCode Status { get; set; }
 		public T Data { get; set; }
 		public string ErrorMessage { get; set; }

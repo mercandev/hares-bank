@@ -176,7 +176,6 @@ namespace HB.Infrastructure.Repository
                 return null;
             }
 
-
             Table.Update(entity);
             context.SaveChanges();
 
@@ -190,8 +189,6 @@ namespace HB.Infrastructure.Repository
                 return entities;
             }
 
-            DateTime date = DateTime.Now;
-
             Table.UpdateRange(entities);
             await context.SaveChangesAsync();
 
@@ -204,8 +201,6 @@ namespace HB.Infrastructure.Repository
             {
                 return null;
             }
-
-            DateTime date = DateTime.Now;
 
             Table.Update(entity);
 

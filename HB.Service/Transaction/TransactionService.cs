@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using HB.Domain.Model;
+using HB.Infrastructure.MartenRepository;
 using HB.SharedObject;
 using HB.SharedObject.TransactionViewModel;
 using Marten;
@@ -12,29 +13,25 @@ namespace HB.Service.Transaction
 {
     public class TransactionService : ITransactionService
     {
-        private readonly IDocumentSession _documentSession;
-        private readonly IQuerySession _querySession;
         private readonly IMapper _mapper;
+        private readonly IMartenRepository<Transactions> _transactionRepository;
 
-        public TransactionService(IDocumentSession documentSession,IQuerySession querySession , IMapper mapper)
+        public TransactionService(IMapper mapper , IMartenRepository<Transactions> transactionRepository)
         {
-            this._documentSession = documentSession;
-            this._querySession = querySession;
             this._mapper = mapper;
+            this._transactionRepository = transactionRepository;
         }
 
         public ReturnState<object> CreateTransaction(Transactions transaction)
         {
-            _documentSession.Insert(transaction);
-            _documentSession.SaveChanges();
+            _transactionRepository.Add(transaction);
             return new ReturnState<object>(true);
         }
 
         public ReturnState<object> ListTransactionsByCustomerId(int customerId , DateTime startDate , DateTime endDate)
         {
-            var result = _querySession.Query<Transactions>()
-                .Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
-                .ToList().OrderByDescending(x=> x.CreatedDate);
+            var result = _transactionRepository.All().Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
+                .ToList().OrderByDescending(x => x.CreatedDate);
 
             var mapperResult = _mapper.Map<List<TransactionsResponseViewModel>>(result);
 
