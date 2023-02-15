@@ -36,7 +36,7 @@ namespace HB.Service.Customer
         private readonly ITransactionService _transactionService;
         private readonly IOptions<JwtModel> _options;
         private readonly IRepository<Customers> _customerRepository;
-        private readonly IUserInformation _userInformation;
+        private readonly IAuthUserInformation _userInformation;
 
         #endregion
 
@@ -50,7 +50,7 @@ namespace HB.Service.Customer
             ITransactionService transactionService,
             IOptions<JwtModel> options,
             IRepository<Customers> customerRepository,
-            IUserInformation userInformation
+            IAuthUserInformation userInformation
             )
         {
             this._hBContext = hbContext;
@@ -213,7 +213,7 @@ namespace HB.Service.Customer
         #region Customer Information
         public ReturnState<object> CustomerInformation()
         {
-            var customerResult = _hBContext.Customers.Where(x => x.Id == _userInformation.GetUserInformation().CustomerId).FirstOrDefault();
+            var customerResult = _hBContext.Customers.Where(x => x.Id == _userInformation.CustomerId).FirstOrDefault();
 
             if (customerResult == null)
             {

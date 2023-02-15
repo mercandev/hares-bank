@@ -53,7 +53,7 @@ builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddTransient<IUserInformation, UserInformation>();
+builder.Services.AddTransient<IAuthUserInformation, AuthUserInformation>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 builder.Services.Configure<Commission>(configuration.GetSection("Commission"));
 builder.Services.AddPdfTurtle("https://pdfturtle.gaitzsch.dev");
