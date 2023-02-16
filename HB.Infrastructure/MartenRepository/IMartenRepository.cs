@@ -7,6 +7,7 @@ namespace HB.Infrastructure.MartenRepository
 		void Update(T entities);
         void Delete(T entities);
 		void Add(T entities);
+		Task AddAsync(T entities);
     }
 }
 

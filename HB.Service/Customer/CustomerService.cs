@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.SignalR;
 using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Repository;
 using HB.Infrastructure.Authentication;
+using System.Net;
 
 namespace HB.Service.Customer
 {
@@ -36,6 +37,8 @@ namespace HB.Service.Customer
         private readonly ITransactionService _transactionService;
         private readonly IOptions<JwtModel> _options;
         private readonly IRepository<Customers> _customerRepository;
+        private readonly IRepository<Address> _addressRepository;
+        private readonly IRepository<Accounts> _accountRepository;
         private readonly IAuthUserInformation _userInformation;
 
         #endregion
@@ -50,6 +53,8 @@ namespace HB.Service.Customer
             ITransactionService transactionService,
             IOptions<JwtModel> options,
             IRepository<Customers> customerRepository,
+            IRepository<Address> addressRepository,
+            IRepository<Accounts> accountRepository,
             IAuthUserInformation userInformation
             )
         {
@@ -61,6 +66,8 @@ namespace HB.Service.Customer
             this._options = options;
             this._customerRepository = customerRepository;
             this._userInformation = userInformation;
+            this._addressRepository = addressRepository;
+            this._accountRepository = accountRepository;
         }
         #endregion
 
@@ -168,45 +175,23 @@ namespace HB.Service.Customer
         #endregion
 
         #region Create Customer
-        public ReturnState<object> CreateCustomer(CreateCustomerViewModel createCustomerViewModel)
+        public async Task<ReturnState<object>> CreateCustomer(CreateCustomerViewModel createCustomerViewModel)
         {
-            var customerModel = new Customers
-            {
-                Name = createCustomerViewModel.Name,
-                Surname = createCustomerViewModel.Surname,
-                Email = createCustomerViewModel.Email,
-                PhoneNumber = createCustomerViewModel.PhoneNumber,
-                Password = createCustomerViewModel.Password,
-                DateOfBrith = createCustomerViewModel.DateOfBrith,
-                BranchOfficesId = createCustomerViewModel.BranchOfficesId,
-            };
+            var customerMappingModel = _mapper.Map<Customers>(createCustomerViewModel);
 
-            var customer = _hBContext.Add(customerModel).Entity;
+            var customer = await _customerRepository.AddAsync(customerMappingModel);
 
-            _hBContext.SaveChanges();
+            createCustomerViewModel.CustomerId = customer.Id;
 
-            var addressModel = new Address
-            {
-                AddressExplanation = createCustomerViewModel.AddressExplanation,
-                CustomerId = customer.Id,
-            };
+            var addressMappingModel = _mapper.Map<Address>(createCustomerViewModel);
 
-            var address = _hBContext.Add(addressModel);
+            await _addressRepository.AddAsync(addressMappingModel);
 
-            var accountModel = new Accounts
-            {
-                BranchOfficesId = createCustomerViewModel.BranchOfficesId,
-                Name = createCustomerViewModel.AccountName,
-                CurrencyId = (int)createCustomerViewModel.CurrencyId,
-                CustomersId = customer.Id,
-                Iban = GeneratorHelper.IbanGenerator()
-            };
+            var accountMappingModel = _mapper.Map<Accounts>(createCustomerViewModel);
 
-            var account = _hBContext.Add(accountModel);
+            await _accountRepository.AddAsync(accountMappingModel);
 
-            _hBContext.SaveChanges();
-
-            return new ReturnState<object>(true);
+            return new ReturnState<object>(statusCode: HttpStatusCode.Created, data: true);
         }
         #endregion
 
@@ -250,25 +235,6 @@ namespace HB.Service.Customer
 
             return new ReturnState<object>(customerInformationResult);
 
-        }
-        #endregion
-
-        #region Customer Login
-        public ReturnState<object> CustomerLogin(string email, string password)
-        {
-            var customerResult = _customerRepository.All().Where(x => x.Email == email && x.Password == password).FirstOrDefault();
-
-            if (customerResult == null) throw new HbBusinessException("Customer not found!");
-
-            var claims = new[]
-            {
-                new Claim("CustomerId", customerResult.Id.ToString()),
-                new Claim(ClaimTypes.Role , "Customer"),
-            };
-
-            var returnModel = new JwtReturnViewModel { Token = new JwtSecurity().CreateJwtToken(claims, _options.Value) };
-
-            return new ReturnState<object>(returnModel);
         }
         #endregion
 

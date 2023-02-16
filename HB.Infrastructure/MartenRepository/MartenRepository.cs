@@ -23,6 +23,12 @@ namespace HB.Infrastructure.MartenRepository
             _documentSession.SaveChanges();
         }
 
+        public async Task AddAsync(T entities)
+        {
+            _documentSession.Insert<T>(entities);
+            await _documentSession.SaveChangesAsync();
+        }
+
         public IQueryable<T> All()
           => _querySession.Query<T>();
 

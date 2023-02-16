@@ -17,7 +17,7 @@ namespace HB.Infrastructure.Authentication
         public AuthUserInformation(IHttpContextAccessor httpContextAccessor)
         {
             this._httpContextAccessor = httpContextAccessor;
-            this.CustomerId = int.Parse(_httpContextAccessor.HttpContext.User.Claims.Where(x => x.Type.Equals(AuthHbConst.CUSTOMER_ID)).Select(x => x.Value).First());
+            this.CustomerId = Convert.ToInt32(_httpContextAccessor.HttpContext.User.Claims.Where(x => x.Type.Equals("CustomerId")).Select(x => x.Value).FirstOrDefault());
         }
 
         public int CustomerId { get; set; } 

@@ -24,7 +24,6 @@
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <None Remove="Const\" />
     <None Remove="Log\" />
-    <None Remove="User\" />
     <None Remove="FirebaseAdmin" />
     <None Remove="FirebaseAuthentication.net" />
     <None Remove="FirebaseStorage.net" />
@@ -42,6 +41,8 @@
     <None Remove="Select.HtmlToPdf" />
     <None Remove="PugPDF.Core" />
     <None Remove="PdfTurtleClientDotnet" />
+    <None Remove="Login\" />
+    <None Remove="Account\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -63,8 +64,9 @@
     <Folder Include="Helpers\" />
     <Folder Include="Const\" />
     <Folder Include="Log\" />
-    <Folder Include="User\" />
     <Folder Include="Enum\" />
     <Folder Include="File\" />
+    <Folder Include="Login\" />
+    <Folder Include="Account\" />
   </ItemGroup>
 </Project>

@@ -9,20 +9,27 @@ using Microsoft.Extensions.Options;
 
 namespace HB.Infrastructure.Jwt
 {
-	public class JwtSecurity
+	public class JwtSecurity : IJwtSecurity
 	{
-        public string CreateJwtToken(Claim[] claims , JwtModel jwtModel)
+        private readonly IOptions<JwtModel> _options;
+
+        public JwtSecurity(IOptions<JwtModel> options)
+        {
+            this._options = options;
+        }
+        
+        public string CreateJwtToken(Claim[] claims)
 		{
             var token = new JwtSecurityToken
             (
-                issuer: jwtModel.Issuer,
-                audience: jwtModel.Audience,
+                issuer: _options.Value.Issuer,
+                audience: _options.Value.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddDays(1),
                 notBefore: DateTime.UtcNow,
                 signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtModel.Key)),
-                    SecurityAlgorithms.HmacSha256)
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.Key)),
+                SecurityAlgorithms.HmacSha256)
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

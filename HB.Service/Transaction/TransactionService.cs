@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using AutoMapper;
 using HB.Domain.Model;
 using HB.Infrastructure.MartenRepository;
@@ -30,8 +31,14 @@ namespace HB.Service.Transaction
 
         public ReturnState<object> ListTransactionsByCustomerId(int customerId , DateTime startDate , DateTime endDate)
         {
-            var result = _transactionRepository.All().Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
-                .ToList().OrderByDescending(x => x.CreatedDate);
+            var result = _transactionRepository.All()
+                .Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
+                .OrderByDescending(x => x.CreatedDate).ToList();
+
+            if(result.Count <= 0)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotFound , "Transaction not found!");
+            }
 
             var mapperResult = _mapper.Map<List<TransactionsResponseViewModel>>(result);
 

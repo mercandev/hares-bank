@@ -6,7 +6,7 @@ namespace HB.Service.Card
 {
 	public interface ICardService
 	{
-        ReturnState<object> PostListCustomerCards(int? customerId);
+        ReturnState<object> PostListCustomerCards();
         ReturnState<object> EmptyCardList();
         Task<ReturnState<object>> PostCreateRandomEmptyCard(int? count);
     }

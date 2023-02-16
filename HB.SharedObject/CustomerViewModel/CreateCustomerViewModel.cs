@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using HB.Domain.Model;
 
 namespace HB.SharedObject.CustomerViewModel
@@ -14,8 +15,11 @@ namespace HB.SharedObject.CustomerViewModel
         public int BranchOfficesId { get; set; }
         public string? AddressExplanation { get; set; }
         public string? AccountName { get; set; }
-        public decimal Amount { get; set; }
+        public decimal Amount { get; set; } = 0;
         public Currency CurrencyId { get; set; }
+
+        [JsonIgnore]
+        public int CustomerId { get; set; }
     }
 }
 

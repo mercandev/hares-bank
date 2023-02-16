@@ -26,7 +26,7 @@ namespace HB.Infrastructure.Repository
             return entities;
         }
 
-        public async Task<IEnumerable<T>> AddAsync(IEnumerable<T> entities)
+        public async Task<T> AddAsync(T entities)
         {
             await Table.AddRangeAsync(entities);
             await context.SaveChangesAsync();
@@ -139,6 +139,11 @@ namespace HB.Infrastructure.Repository
         public async Task<ICollection<T>> FindAllAsync(Expression<Func<T, bool>> match)
         {
             return await Table.Where(match).ToListAsync();
+        }
+
+        public async Task<T> FindAllFirstOrDefaultAsync(Expression<Func<T, bool>> match)
+        {
+            return await Table.Where(match).FirstOrDefaultAsync();
         }
 
         public async Task<T> FindAsync(Expression<Func<T, bool>> match)

@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 using HB.SharedObject;
 using HB.Service.Log;
-using HB.Service.User;
 using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
 using HB.Infrastructure.Engine;
@@ -28,6 +27,8 @@ using HB.Infrastructure.DbContext;
 using HB.Infrastructure.MartenRepository;
 using HB.Infrastructure;
 using HB.Infrastructure.Authentication;
+using HB.Service.Login;
+using HB.Service.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -46,13 +47,15 @@ builder.Services.FirebaseAuthRegister(configuration);
 #region Register Services
 
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILogService, LogService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IJwtSecurity, JwtSecurity>();
 builder.Services.AddTransient<IAuthUserInformation, AuthUserInformation>();
 builder.Services.Configure<JwtModel>(configuration.GetSection("Jwt"));
 builder.Services.Configure<Commission>(configuration.GetSection("Commission"));

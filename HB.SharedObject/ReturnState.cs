@@ -15,10 +15,11 @@ namespace HB.SharedObject
 			Data = (T?)result;
 		}
 
-		public ReturnState(HttpStatusCode statusCode , string errorMessage)
+		public ReturnState(HttpStatusCode statusCode , string? errorMessage = null, object? data = null)
 		{
 			Status = statusCode;
 			ErrorMessage = errorMessage;
+			Data = (T?)data;
 		}
 
 		public HttpStatusCode Status { get; set; }

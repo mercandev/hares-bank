@@ -17,6 +17,8 @@ namespace HB.Infrastructure.Repository
 
         Task<ICollection<T>> FindAllAsync(Expression<Func<T, bool>> match);
 
+        Task<T> FindAllFirstOrDefaultAsync(Expression<Func<T, bool>> match);
+
         Task<T> FindAsync(Expression<Func<T, bool>> match);
 
         T Get(int id);

@@ -5,7 +5,7 @@ namespace HB.Infrastructure.Repository
 	{
         T Add(T entities);
 
-        Task<IEnumerable<T>> AddAsync(IEnumerable<T> entities);
+        Task<T> AddAsync(T entities);
 
         void Delete(IEnumerable<T> entities);
 

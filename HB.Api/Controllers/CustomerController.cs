@@ -31,18 +31,13 @@ namespace HB.Api.Controllers
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.ALL_STAFF)]
-        public ReturnState<object> PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
-        => _customerService.CreateCustomer(createCustomerViewModel);
+        public async Task<ReturnState<object>> PostAddCustomer(CreateCustomerViewModel createCustomerViewModel)
+        => await _customerService.CreateCustomer(createCustomerViewModel);
 
         [HttpGet]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> CustomerInformation()
         => _customerService.CustomerInformation();
-
-        [HttpPost]
-        [AllowAnonymous]
-        public ReturnState<object> PostLoginCustomer(LoginInputViewModel model)
-        => _customerService.CustomerLogin(model.Email, model.Password);
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]

@@ -36,7 +36,7 @@ namespace HB.Api.Controllers
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public ReturnState<object> PostListCustomerCards()
-        => _cardService.PostListCustomerCards(HttpContext.GetCurrentUserId());
+        => _cardService.PostListCustomerCards();
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.ADMIN)]

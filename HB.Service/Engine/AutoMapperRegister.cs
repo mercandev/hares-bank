@@ -21,6 +21,13 @@ namespace HB.Service.Engine
             CreateMap<Accounts, AccountsViewModel>().ReverseMap();
             CreateMap<AccountsViewModel, Accounts>().ReverseMap();
 
+            CreateMap<CreateCustomerViewModel, Accounts>()
+                .ForMember(dest => dest.CurrencyId, from => from.MapFrom(s => (int)s.CurrencyId))
+                .ForMember(dest => dest.CustomersId, from => from.MapFrom(s => s.CustomerId))
+                .ForMember(dest => dest.Name, from => from.MapFrom(s => s.AccountName))
+                .ForMember(dest => dest.Iban, from => from.MapFrom(s => GeneratorHelper.IbanGenerator()));
+
+
             //Cards
             CreateMap<CardGeneratorViewModel, Cards>().ReverseMap();
             CreateMap<Cards, CardGeneratorViewModel>().ReverseMap();
@@ -43,6 +50,18 @@ namespace HB.Service.Engine
                 .ForMember(dest => dest.Changing, from => from.MapFrom(s => s.degisim))
                 .ForMember(dest => dest.ChangingRate, from => from.MapFrom(s => s.d_oran))
                 .ForMember(dest => dest.ChangeingRoute, from => from.MapFrom(s => s.d_yon));
+
+
+            //Customer
+            CreateMap<Customers, CreateCustomerViewModel>().ReverseMap();
+            CreateMap<CreateCustomerViewModel, Customers>().ReverseMap();
+
+
+            //Adress
+            CreateMap<CreateCustomerViewModel, Address>().ReverseMap();
+            CreateMap<Address, CreateCustomerViewModel>().ReverseMap();
+
+
         }
     }
 }
