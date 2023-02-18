@@ -38,7 +38,7 @@ namespace HB.Api.Controllers
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
         public async Task<ReturnState<object>> PostCreateIbanTransfer(PostSendMoneyWithIbanViewModel model)
-        => await _paymentService.CreateIbanTransfer(HttpContext.GetCurrentUserId(), model);
+        => await _paymentService.CreateIbanTransfer(model);
 
         [HttpGet]
         [AuthHb(Roles = UserRoles.ALL_USERS)]

@@ -36,7 +36,7 @@ namespace HB.Service.Account
 
             await _accountRepository.AddAsync(accounts);
 
-            return new ReturnState<object>(true);
+            return new ReturnState<object>(HttpStatusCode.Created, data: true);
         }
     }
 }

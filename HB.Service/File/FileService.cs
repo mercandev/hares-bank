@@ -11,34 +11,46 @@ using System.Threading;
 using PdfTurtleClientDotnet.Models;
 using PdfTurtleClientDotnet;
 using System.IO;
+using HB.Infrastructure.MartenRepository;
+using System.Net;
+using HB.Service.Helpers;
 
 namespace HB.Service.File
 {
     public class FileService : IFileService
     {
-        private readonly IQuerySession _querySession;
+        private readonly IMartenRepository<Transactions> _martenRepository; 
         private readonly IPdfTurtleClient _pdfTurtleClient;
 
-        public FileService(IQuerySession querySession, IPdfTurtleClient pdfTurtleClient)
+        public FileService(IMartenRepository<Transactions> martenRepository, IPdfTurtleClient pdfTurtleClient)
         {
-            this._querySession = querySession;
+            this._martenRepository = martenRepository;
             this._pdfTurtleClient = pdfTurtleClient;
         }
 
         public async Task<ReturnState<object>> GenerateReceiptPdf(Guid transactionsId)
         {
-            if (transactionsId == default(Guid)) throw new Exception("TransactionId can not be a empty!");
+            if (transactionsId == default(Guid))
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "TransactionId can not be a empty!");
+            }
 
-            var transactions = FindTransaction(transactionsId);
+            var transactions = await FindTransaction(transactionsId);
 
-            if (transactions == null) throw new Exception("Transaction not found!");
+            if (transactions is null)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Transaction not found!");
+            }
 
-            var receiptHtmlContent = ReceiptFormatWithTransactionsData(transactions);
+            var receiptHtmlContent = FileHelper.ReceiptFormatWithTransactionsData(transactions);
 
             var renderData = new RenderData
             {
                 Html = receiptHtmlContent,
-                Options = new RenderOptions { PageFormat = RenderOptionsPageFormat.A3}
+                Options = new RenderOptions
+                {
+                    PageFormat = RenderOptionsPageFormat.A3
+                }
             };
 
             var pdfStream = await _pdfTurtleClient.RenderAsync(renderData);
@@ -48,36 +60,27 @@ namespace HB.Service.File
 
         public async Task<ReturnState<object>> TransactionsHtml(Guid transactionsId)
         {
-            if (transactionsId == default(Guid)) throw new Exception("TransactionId can not be a empty!");
+            if (transactionsId == default(Guid))
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "TransactionId can not be a empty!");
+            }
 
-            var transactions = FindTransaction(transactionsId);
+            var transactions = await FindTransaction(transactionsId);
 
-            if (transactions == null) throw new Exception("Transaction not found!");
+            if (transactions is null)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Transaction not found!");
+            }
 
-            var receiptHtmlContent = ReceiptFormatWithTransactionsData(transactions);
+            var receiptHtmlContent = FileHelper.ReceiptFormatWithTransactionsData(transactions);
 
             return new ReturnState<object>(receiptHtmlContent);
         }
 
-        private Transactions FindTransaction(Guid transactionsId)
-        {
-            return _querySession.Query<Transactions>().Where(x => x.Id == transactionsId).FirstOrDefault();
-        }
+        private async Task<Transactions> FindTransaction(Guid transactionsId)
+            => await _martenRepository.FirstOrDefaultAsync(x => x.Id == transactionsId);
 
-        private string ReceiptFormatWithTransactionsData(Transactions transactions)
-        {
-           return ReceiptConst.RECEIPT_HTML
-           .Replace("{0}", transactions.Id.ToString())
-           .Replace("{1}", transactions.CreatedDate.ToString())
-           .Replace("{2}", transactions.ReceiptInformation.SenderName)
-           .Replace("{3}", transactions.ReceiptInformation.SenderIban)
-           .Replace("{4}", transactions.ReceiptInformation.ReciverName)
-           .Replace("{5}", transactions.ReceiptInformation.ReciverIban)
-           .Replace("{6}", transactions.ReceiptInformation.TransactionExplanation)
-           .Replace("{7}", transactions.ReceiptInformation.Balance.ToString())
-           .Replace("\n", @"")
-           .Replace("\"", @"'");
-        }
+
     }
 }
 

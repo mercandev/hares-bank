@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Transactions;
 using AutoMapper;
 using HB.Domain.Model;
+using HB.Infrastructure.Authentication;
 using HB.Infrastructure.Const;
 using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
+using HB.Infrastructure.Repository;
 using HB.Service.Const;
 using HB.Service.Helpers;
 using HB.Service.Transaction;
@@ -26,6 +29,8 @@ namespace HB.Service.Payment
         private readonly ITransactionService _transactionService;
         private readonly IOptions<Commission> _options;
         private readonly IMapper _mapper;
+        private readonly IAuthUserInformation _authUserInformation;
+        private readonly IRepository<Accounts> _accountsRepository;
 
         public PaymentService(
             HbContext hbContext,
@@ -33,7 +38,9 @@ namespace HB.Service.Payment
             IQuerySession querySession,
             ITransactionService transactionService,
             IOptions<Commission> options,
-            IMapper mapper
+            IMapper mapper,
+            IAuthUserInformation authUserInformation,
+            IRepository<Accounts> accountsRepository
             )
         {
             this._hBContext = hbContext;
@@ -42,30 +49,40 @@ namespace HB.Service.Payment
             this._transactionService = transactionService;
             this._options = options;
             this._mapper = mapper;
+            this._authUserInformation = authUserInformation;
+            this._accountsRepository = accountsRepository;
         }
 
         #region CreateIbanTransfer
-        public async Task<ReturnState<object>> CreateIbanTransfer(int customerId , PostSendMoneyWithIbanViewModel model)
+        public async Task<ReturnState<object>> CreateIbanTransfer(PostSendMoneyWithIbanViewModel model)
         {
             PaymentHelper.IbanValidation(model.Iban);
 
-            var userInformation = _hBContext.Accounts
-                .Include("Customers")
-                .Where(x => x.CustomersId == customerId).FirstOrDefault();
+            var userInformation = _accountsRepository.All().Where(x => x.CustomersId == _authUserInformation.CustomerId)
+                .Include("Customers").FirstOrDefault();
 
-            if (userInformation == null) throw new HbBusinessException("User not found!");
+            if (userInformation is null)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotFound, "User not found!");
+            } 
 
             var checkAmount = userInformation.Amount - model.Price;
 
-            if (checkAmount <= 0M) throw new HbBusinessException("Insufficient balance!");
+            if (checkAmount <= 0M)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Insufficient balance!");
+            }
 
-            var isIbanHaresBankOwned = _hBContext.Accounts.Where(x => x.Iban == model.Iban).FirstOrDefault();
+            var isIbanHaresBankOwned = await _accountsRepository.FindAllFirstOrDefaultAsync(x => x.Iban == model.Iban);
 
-            if (isIbanHaresBankOwned == null)
+            if (isIbanHaresBankOwned is null)
             {
                 var checkBalance = checkAmount - _options.Value.Rate;
 
-                if (checkBalance <= 0M) throw new HbBusinessException("The balance is not enough for the commission amount");
+                if (checkBalance <= 0M)
+                {
+                    return new ReturnState<object>(HttpStatusCode.NotAcceptable, "The balance is not enough for the commission amount");
+                } 
             }
 
             var ibanTransactionModel = new IbanTransactionViewModel()
@@ -88,7 +105,7 @@ namespace HB.Service.Payment
                 TransactionExplanation = $"{model.UserNameAndSurname}'a iban ile para gönderimi. {model.Price}₺"
             };
 
-            if (isIbanHaresBankOwned != null)
+            if (isIbanHaresBankOwned is not null)
             {
                 StartIbanPaymentComplate(userInformation , ibanTransactionModel , receiptInformationViewModel,  false);
 

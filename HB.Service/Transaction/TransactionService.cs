@@ -26,7 +26,7 @@ namespace HB.Service.Transaction
         public ReturnState<object> CreateTransaction(Transactions transaction)
         {
             _transactionRepository.Add(transaction);
-            return new ReturnState<object>(true);
+            return new ReturnState<object>(HttpStatusCode.Created, data: true);
         }
 
         public ReturnState<object> ListTransactionsByCustomerId(int customerId , DateTime startDate , DateTime endDate)
