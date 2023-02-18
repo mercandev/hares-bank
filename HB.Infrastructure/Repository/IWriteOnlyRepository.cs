@@ -23,7 +23,7 @@ namespace HB.Infrastructure.Repository
 
         T Update(int id, T entity);
 
-        Task<IEnumerable<T>> UpdateAsync(IEnumerable<T> entities);
+        Task<T> UpdateAsync(T entities);
 
         Task<T> UpdateAsync(int id, T entity);
     }

@@ -36,29 +36,8 @@ namespace HB.Api.Controllers
 
         [HttpGet]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public ReturnState<object> CustomerInformation()
-        => _customerService.CustomerInformation();
-
-        [HttpPost]
-        [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public async Task<ReturnState<object>> DelegateCardCustomer([FromBody] int customerId, CardType cardType)
-        => await _customerService.DelegateCardCustomer(customerId,cardType);
-
-        [HttpPost]
-        [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public async Task<ReturnState<object>> CreateCustomerAccount(CreateAccountViewModel model)
-        => await _customerService.CreateAccount(HttpContext.GetCurrentUserId() , model);
-
-        [HttpPost]
-        [AuthHb(Roles = UserRoles.ALL_USERS)]
-        public async Task<ReturnState<object>> GetCoalsDetail(CoalDetailViewModel model)
-        => await _customerService.CoalInformation(model);
-
-        [HttpPost]
-        [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public async Task<ReturnState<object>> BuyGold(ConvertMoneyToCoalViewModel model)
-        => await _customerService.BuyGold(HttpContext.GetCurrentUserId(), model);
-
+        public async Task<ReturnState<object>> CustomerInformation()
+        => await _customerService.CustomerInformation();
     }
 }
 

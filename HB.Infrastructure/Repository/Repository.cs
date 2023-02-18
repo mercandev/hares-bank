@@ -49,6 +49,11 @@ namespace HB.Infrastructure.Repository
             return await Table.AnyAsync(expression);
         }
 
+        public async Task<T> WhereAsync(Expression<Func<T, bool>> expression)
+        {
+            return await Table.FindAsync(expression);
+        }
+
         public int Count(Expression<Func<T, bool>> expression)
         {
             return Table.Count(expression);
@@ -143,7 +148,7 @@ namespace HB.Infrastructure.Repository
 
         public async Task<T> FindAllFirstOrDefaultAsync(Expression<Func<T, bool>> match)
         {
-            return await Table.Where(match).FirstOrDefaultAsync();
+            return await Table.FirstOrDefaultAsync(match);
         }
 
         public async Task<T> FindAsync(Expression<Func<T, bool>> match)
@@ -187,14 +192,10 @@ namespace HB.Infrastructure.Repository
             return entity;
         }
 
-        public async Task<IEnumerable<T>> UpdateAsync(IEnumerable<T> entities)
+        public async Task<T> UpdateAsync(T entities)
         {
-            if (entities == null || !entities.Any())
-            {
-                return entities;
-            }
-
-            Table.UpdateRange(entities);
+            Table.Update(entities);
+            Table.Entry(entities).State = EntityState.Modified;
             await context.SaveChangesAsync();
 
             return entities;

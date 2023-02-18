@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq.Expressions;
+using System.Threading;
 using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Repository;
 using Marten;
@@ -38,11 +40,31 @@ namespace HB.Infrastructure.MartenRepository
             _documentSession.SaveChanges();
         }
 
+        public List<T> FindAll(Expression<Func<T, bool>> match)
+        => _querySession.Query<T>().Where(match).ToList();
+
+        public async Task<List<T>> FindAllAsync(Expression<Func<T, bool>> match)
+        => (List<T>)await _querySession.Query<T>().Where(match).ToListAsync();
+
+        public T FirstOrDefault(Expression<Func<T, bool>> match)
+        => _querySession.Query<T>().Where(match).FirstOrDefault();
+
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> match)
+        => await _querySession.Query<T>().Where(match).FirstOrDefaultAsync();
+
         public void Update(T entity)
         {
             _documentSession.Update<T>(entity);
             _documentSession.SaveChanges();
         }
+
+        public async Task UpdateAsync(T entities)
+        {
+            _documentSession.Update<T>(entities);
+            await _documentSession.SaveChangesAsync();
+        }
+
+
     }
 }
 

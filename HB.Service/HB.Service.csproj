@@ -43,6 +43,8 @@
     <None Remove="PdfTurtleClientDotnet" />
     <None Remove="Login\" />
     <None Remove="Account\" />
+    <None Remove="CustomMapping\" />
+    <None Remove="Process\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -68,5 +70,7 @@
     <Folder Include="File\" />
     <Folder Include="Login\" />
     <Folder Include="Account\" />
+    <Folder Include="CustomMapping\" />
+    <Folder Include="Process\" />
   </ItemGroup>
 </Project>

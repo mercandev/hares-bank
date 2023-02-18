@@ -29,6 +29,7 @@ using HB.Infrastructure;
 using HB.Infrastructure.Authentication;
 using HB.Service.Login;
 using HB.Service.Account;
+using HB.Service.Process;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -53,6 +54,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IProcessService, ProcessService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IJwtSecurity, JwtSecurity>();

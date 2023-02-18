@@ -30,18 +30,23 @@ namespace HB.Api.Controllers
 
         [AuthHb(Roles = UserRoles.ALL_STAFF)]
         [HttpGet]
-        public ReturnState<object> GetEmptyCardList()
-        => _cardService.EmptyCardList();
+        public async Task<ReturnState<object>> GetEmptyCardList()
+        =>await _cardService.EmptyCardList();
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public ReturnState<object> PostListCustomerCards()
-        => _cardService.PostListCustomerCards();
+        public async Task<ReturnState<object>> PostListCustomerCards()
+        => await _cardService.PostListCustomerCards();
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.ADMIN)]
         public async Task<ReturnState<object>> PostCreateRandomEmptyCard([FromBody] int count)
         => await _cardService.PostCreateRandomEmptyCard(count);
+
+        [HttpPost]
+        [AuthHb(Roles = UserRoles.CUSTOMER)]
+        public async Task<ReturnState<object>> DelegateCardCustomer(CardType cardType)
+        => await _cardService.DelegateCardCustomer(cardType);
     }
 }
 

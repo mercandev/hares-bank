@@ -17,9 +17,7 @@ namespace HB.Api.Controllers
         private readonly ILoginService _loginService;
 
         public LoginController(ILoginService loginService)
-        {
-            this._loginService = loginService;
-        }
+        => this._loginService = loginService;
 
         [HttpPost]
         [AllowAnonymous]
@@ -29,7 +27,7 @@ namespace HB.Api.Controllers
         [HttpPost]
         [AllowAnonymous]
         public async Task<ReturnState<object>> PostLoginUser([FromBody] UserLoginPostViewModel model)
-       => await _loginService.UserLogin(model);
+        => await _loginService.UserLogin(model);
     }
 }
 
