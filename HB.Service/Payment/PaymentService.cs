@@ -9,8 +9,10 @@ using HB.Infrastructure.Const;
 using HB.Infrastructure.DbContext;
 using HB.Infrastructure.Exceptions;
 using HB.Infrastructure.Jwt;
+using HB.Infrastructure.MartenRepository;
 using HB.Infrastructure.Repository;
 using HB.Service.Const;
+using HB.Service.CustomMapping;
 using HB.Service.Helpers;
 using HB.Service.Transaction;
 using HB.SharedObject;
@@ -23,34 +25,31 @@ namespace HB.Service.Payment
 {
     public class PaymentService : IPaymentService
     {
-        private readonly HbContext? _hBContext;
-        private readonly IDocumentSession _documentSession;
-        private readonly IQuerySession _querySession;
         private readonly ITransactionService _transactionService;
         private readonly IOptions<Commission> _options;
         private readonly IMapper _mapper;
         private readonly IAuthUserInformation _authUserInformation;
         private readonly IRepository<Accounts> _accountsRepository;
+        private readonly IRepository<Organisations> _organisationRepository;
+        private readonly IMartenRepository<Cards> _cardRepository;
 
         public PaymentService(
-            HbContext hbContext,
-            IDocumentSession documentSession,
-            IQuerySession querySession,
             ITransactionService transactionService,
             IOptions<Commission> options,
             IMapper mapper,
             IAuthUserInformation authUserInformation,
-            IRepository<Accounts> accountsRepository
+            IRepository<Accounts> accountsRepository,
+            IRepository<Organisations> organisationRepository,
+            IMartenRepository<Cards> cardRepository
             )
         {
-            this._hBContext = hbContext;
-            this._documentSession = documentSession;
-            this._querySession = querySession;
             this._transactionService = transactionService;
             this._options = options;
             this._mapper = mapper;
             this._authUserInformation = authUserInformation;
             this._accountsRepository = accountsRepository;
+            this._organisationRepository = organisationRepository;
+            this._cardRepository = cardRepository;
         }
 
         #region CreateIbanTransfer
@@ -85,29 +84,13 @@ namespace HB.Service.Payment
                 } 
             }
 
-            var ibanTransactionModel = new IbanTransactionViewModel()
-            {
-                AccountId = userInformation.Id,
-                Amount = model.Price,
-                AvailableBalance = checkAmount,
-                CustomerId = userInformation.CustomersId,
-                Explanation = PaymentIbanConst.IBAN_TRANSFER_EXPLANATION,
-                TransactionsType = TransactionsType.PaymentWithIban
-            };
+            var ibanTransactionModel = CustomPaymentMapping.CreateIbanTransaction(userInformation, model.Price, checkAmount);
 
-            ReceiptInformation receiptInformationViewModel = new()
-            {
-                Balance = model.Price,
-                SenderIban = userInformation.Iban,
-                SenderName = $"{userInformation.Customers.Name} {userInformation.Customers.Surname}",
-                ReciverName = model.UserNameAndSurname,
-                ReciverIban = model.Iban,
-                TransactionExplanation = $"{model.UserNameAndSurname}'a iban ile para gönderimi. {model.Price}₺"
-            };
+            var receiptInformationModel = CustomPaymentMapping.CreateReceiptInformationIbanTransfer(model, userInformation);
 
             if (isIbanHaresBankOwned is not null)
             {
-                StartIbanPaymentComplate(userInformation , ibanTransactionModel , receiptInformationViewModel,  false);
+                await StartIbanPaymentComplate(userInformation , ibanTransactionModel , receiptInformationModel,  false);
 
                 return new ReturnState<object>(true);
             }
@@ -116,227 +99,99 @@ namespace HB.Service.Payment
             {
                 if (i == 1) //commission
                 {
-                    StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationViewModel, true);
+                    await StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationModel, true);
                     continue;
                 }
 
-                StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationViewModel, false);
+                await StartIbanPaymentComplate(userInformation, ibanTransactionModel, receiptInformationModel, false);
             }
 
             return new ReturnState<object>(true);
-        }
-        #endregion
-
-        #region Organisations
-        public ReturnState<object> GetOrganisations()
-        {
-            var result = _hBContext.Organisations.ToList();
-
-            var mapperResult = _mapper.Map<List<OrganisationsViewModel>>(result);
-
-            return new ReturnState<object>(mapperResult);
         }
         #endregion
 
         #region OnlinePaymentCard
         public async Task<ReturnState<object>> PostOnlinePaymentCard(PostCheckPaymentInformationViewModel model)
         {
-            var card = CheckCardIsExist(model);
+            var result = await CheckCardIsExist(model);
+
+            var card = (Cards) result.Data;
 
             if (card.CardType == CardType.CreditCard)
             {
-                var paymentAmount = card.CardCurrentAmount - model.Price;
-
-                if (paymentAmount < 0) throw new HbBusinessException("Insufficient card limit!");
-
-                card.CardCurrentAmount = paymentAmount;
-
-                _documentSession.Update(card);
-                await _documentSession.SaveChangesAsync();
-
-                var transaction = CreateTransactionCreditCard(card, model);
-
-                _transactionService.CreateTransaction(transaction);
-
-                return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transaction.Id.ToString() , PaymentResult =true});
+                return await CreditCardPayment(model, card);
             }
 
-            if (card.CardType == CardType.DebitCard)
-            {
-                var customerAccount = _hBContext.Accounts
-                    .Include("Customers")
-                    .Where(x => x.Id == card.AccountId && x.IsActive).FirstOrDefault();
-
-                if (customerAccount == null) throw new HbBusinessException("User account not found!");
-
-                var paymentAmount = customerAccount.Amount - model.Price;
-
-                if (paymentAmount < 0) throw new HbBusinessException("Insufficient balance!");
-
-                customerAccount.Amount = paymentAmount;
-
-                _hBContext.Entry(customerAccount).State = EntityState.Modified;
-                await _hBContext.SaveChangesAsync();
-
-                card.CardCurrentAmount = customerAccount.Amount;
-
-                ReceiptInformation receiptInformationViewModel = new()
-                {
-                    Balance = model.Price,
-                    SenderIban = customerAccount.Iban,
-                    SenderName = $"{customerAccount.Customers.Name} {customerAccount.Customers.Surname}",
-                    ReciverName = model.PaymentSource,
-                    ReciverIban = string.Empty,
-                    TransactionExplanation = $"{model.PaymentSource} online harcama tahsilatı. {model.Price}₺"
-                };
-
-                var transaction = CreateTransactionDebidCard(card, model, receiptInformationViewModel);
-
-                _transactionService.CreateTransaction(transaction);
-
-                return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transaction.Id.ToString(), PaymentResult = true });
-            }
-
-            throw new HbBusinessException("Out-of-process!");
+            return await CreditDebidCardPayment(model, card);
         }
         #endregion
 
-        public ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
+        #region OnlinePaymentCheckCardInformation
+        public async Task<ReturnState<object>> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
         {
-            CheckCardIsExist(model);
+            var result = await CheckCardIsExist(model);
+
+            if (result.ErrorMessage is not null)
+            {
+                return result;
+            }
 
             return new ReturnState<object>(true);
         }
+        #endregion
 
         #region Invoice Payment
-        public ReturnState<object> PostPayInvoice(int customerId, InvoicePaymentViewModel model)
+        public async Task<ReturnState<object>> PostPayInvoice(InvoicePaymentViewModel model)
         {
-            var accountInformation = _hBContext.Accounts
-                .Include("Customers")
-                .Where(x => x.CustomersId == customerId).FirstOrDefault();
+            var accountInformation = _accountsRepository.All().Include("Customers")
+                .FirstOrDefault(x => x.CustomersId == _authUserInformation.CustomerId);
 
-            if (accountInformation == null) throw new HbBusinessException("User not found!");
+            if (accountInformation is null)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotFound, "User not found!");
+            }
 
-            var organisation = _hBContext.Organisations.Where(x => x.Id == model.OrganisationId).FirstOrDefault();
+            var organisation = await _organisationRepository.FindAllFirstOrDefaultAsync(x => x.Id == model.OrganisationId);
 
             var checkAmaount = accountInformation.Amount - organisation.InvoiceAmount;
 
-            if (checkAmaount <= 0M) throw new HbBusinessException("Insufficient balance!");
+            if (checkAmaount <= 0M)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Insufficient balance!");
+            }
 
             accountInformation.Amount = checkAmaount;
 
-            _hBContext.Entry(accountInformation).State = EntityState.Modified;
-            _hBContext.SaveChanges();
+            await _accountsRepository.UpdateAsync(accountInformation);
 
-            var invoicePayment = new InvoicePaymentTransactionViewModel
-            {
-                AccountId = accountInformation.Id,
-                Amount = organisation.InvoiceAmount,
-                AvailableBalance = checkAmaount,
-                CustomerId = accountInformation.CustomersId,
-                Explanation = $"{organisation.OrganisationType.GetEnumDescription()} - ({organisation.Name})"
-            };
+            var invoicePayment = CustomPaymentMapping.CreateInvoicePayment(accountInformation,organisation,checkAmaount);
 
-            ReceiptInformation receiptInformationViewModel = new()
-            {
-                Balance = organisation.InvoiceAmount,
-                SenderIban = accountInformation.Iban,
-                SenderName = $"{accountInformation.Customers.Name} {accountInformation.Customers.Surname}",
-                ReciverName = organisation.Name,
-                ReciverIban = organisation.Iban,
-                TransactionExplanation = $"{model.SubscriberNumber} abonelik için {organisation.Name} ücret tahsilatı. {organisation.InvoiceAmount}₺"
-            };
+            var receiptInformation = CustomPaymentMapping.CreateInvoicePaymentReceipt(accountInformation, organisation, model);
 
-            var transactions = CreateTransactionInvoicePayment(invoicePayment , receiptInformationViewModel);
+            var transactions = CustomPaymentMapping.CreateTransactionInvoicePayment(invoicePayment , receiptInformation);
 
-            _transactionService.CreateTransaction(transactions);
+            await _transactionService.CreateTransaction(transactions);
 
             return new ReturnState<object>(true);
         }
         #endregion
 
-        private Cards CheckCardIsExist(PostCheckPaymentInformationViewModel model)
+        private async Task<ReturnState<object>> CheckCardIsExist(PostCheckPaymentInformationViewModel model)
         {
-            var cardInformationResult = _querySession.Query<Cards>()
-                .Where(
-                x =>
-                x.CardNumber == model.Card.CardNumber &&
-                x.CustomerName == model.Card.CustomerName &&
-                x.LastUseMount == model.Card.LastUseMount &&
-                x.LastUseYear == model.Card.LastUseYear &&
-                x.Cvv == model.Card.Cvv &&
-                x.IsActive).FirstOrDefault();
+            var cardInformationResult = await _cardRepository.FirstOrDefaultAsync(
+               x => x.CardNumber == model.Card.CardNumber && x.CustomerName == model.Card.CustomerName &&
+               x.LastUseMount == model.Card.LastUseMount && x.LastUseYear == model.Card.LastUseYear &&
+               x.Cvv == model.Card.Cvv && x.IsActive);
 
-            if (cardInformationResult == null) throw new HbBusinessException("Card not found!");
-
-            return cardInformationResult;
-        }
-
-        #region Transactions
-
-        private Transactions CreateTransactionCreditCard(Cards card , PostCheckPaymentInformationViewModel model)
-        {
-            return new Transactions()
+            if (cardInformationResult is null)
             {
-                CardId = card.Id,
-                ProccessType = ProccessType.Outgoid,
-                TransactionsType = TransactionsType.OnlinePayment,
-                CustomerId = card.CustomerId,
-                Explanation = model.PaymentSource,
-                AvailableBalance = card.CardCurrentAmount,
-                Amount = model.Price
-            };
+                return new ReturnState<object>(HttpStatusCode.NotFound , "Card not found!");
+            }
+
+            return new ReturnState<object>(cardInformationResult);
         }
 
-        private Transactions CreateTransactionDebidCard(Cards card, PostCheckPaymentInformationViewModel model , ReceiptInformation receiptModel)
-        {
-            return new Transactions()
-            {
-                CardId = card.Id,
-                ProccessType = ProccessType.Outgoid,
-                TransactionsType = TransactionsType.OnlinePayment,
-                CustomerId = card.CustomerId,
-                Explanation = model.PaymentSource,
-                Amount = model.Price,
-                AvailableBalance = card.CardCurrentAmount,
-                AccountId = card.AccountId,
-                ReceiptInformation = receiptModel
-            };
-        }
-
-        private Transactions CreateTransactionIbanTransfer(IbanTransactionViewModel model , ReceiptInformation receiptInformation)
-        {
-            return new Transactions()
-            {
-                ProccessType = ProccessType.Outgoid,
-                TransactionsType = model.TransactionsType,
-                CustomerId = model.CustomerId,
-                Explanation = model.Explanation,
-                Amount = model.Amount,
-                AvailableBalance = model.AvailableBalance,
-                AccountId = model.AccountId,
-                ReceiptInformation = receiptInformation
-            };
-        }
-
-        private Transactions CreateTransactionInvoicePayment(InvoicePaymentTransactionViewModel model, ReceiptInformation receiptInformationModel)
-        {
-            return new Transactions()
-            {
-                ProccessType = ProccessType.Outgoid,
-                TransactionsType = TransactionsType.Corporation,
-                CustomerId = model.CustomerId,
-                Explanation = model.Explanation,
-                Amount = model.Amount,
-                AvailableBalance = model.AvailableBalance,
-                AccountId = model.AccountId,
-                ReceiptInformation = receiptInformationModel
-            };
-        }
-
-        #endregion
-
-        private void StartIbanPaymentComplate(Accounts userInformation , IbanTransactionViewModel transactionInformation, ReceiptInformation receiptInformation , bool isCommission)
+        private async Task StartIbanPaymentComplate(Accounts userInformation , IbanTransactionViewModel transactionInformation, ReceiptInformation receiptInformation , bool isCommission)
         {
             if (isCommission)
             {
@@ -347,8 +202,7 @@ namespace HB.Service.Payment
 
             userInformation.Amount = transactionInformation.AvailableBalance;
 
-            _hBContext.Entry(userInformation).State = EntityState.Modified;
-            _hBContext.SaveChanges();
+            await _accountsRepository.UpdateAsync(userInformation);
 
             if (isCommission)
             {
@@ -359,10 +213,63 @@ namespace HB.Service.Payment
                 receiptInformation.TransactionExplanation = $"{receiptInformation.SenderName}'a iban ile para gönderimi. (Komisyon kesintisi. -Hares Bank) {_options.Value.Rate}₺";
             }
 
-            var transaction = CreateTransactionIbanTransfer(transactionInformation , receiptInformation);
+            var transaction = CustomPaymentMapping.CreateTransactionIbanTransfer(transactionInformation , receiptInformation);
 
-            _transactionService.CreateTransaction(transaction);
+            await _transactionService.CreateTransaction(transaction);
         }
+
+        private async Task<ReturnState<object>> CreditCardPayment(PostCheckPaymentInformationViewModel model , Cards card)
+        {
+            var paymentAmountCreditCard = card.CardCurrentAmount - model.Price;
+
+            if (paymentAmountCreditCard <= 0)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Insufficient card limit!");
+            }
+
+            card.CardCurrentAmount = paymentAmountCreditCard;
+
+            await _cardRepository.UpdateAsync(card);
+
+            var transactionCreditCard = CustomPaymentMapping.CreateTransactionCreditCard(card, model);
+
+            await _transactionService.CreateTransaction(transactionCreditCard);
+
+            return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transactionCreditCard.Id.ToString(), PaymentResult = true });
+        }
+
+        private async Task<ReturnState<object>> CreditDebidCardPayment(PostCheckPaymentInformationViewModel model, Cards card)
+        {
+            var customerAccount = _accountsRepository.All().Include("Customers")
+                .Where(x => x.Id == card.AccountId && x.IsActive).FirstOrDefault();
+
+            if (customerAccount is null)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotFound, "User not found!");
+            }
+
+            var paymentAmount = customerAccount.Amount - model.Price;
+
+            if (paymentAmount <= 0)
+            {
+                return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Insufficient balance!");
+            }
+
+            customerAccount.Amount = paymentAmount;
+
+            await _accountsRepository.UpdateAsync(customerAccount);
+
+            card.CardCurrentAmount = customerAccount.Amount;
+
+            var receiptInformation = CustomPaymentMapping.CreateReceiptInformationOnlinePayment(model, customerAccount);
+
+            var transaction = CustomPaymentMapping.CreateTransactionDebidCard(card, model, receiptInformation);
+
+            await _transactionService.CreateTransaction(transaction);
+
+            return new ReturnState<object>(new PaymentResponseViewModel { PaymentRefNo = transaction.Id.ToString(), PaymentResult = true });
+        }
+
     }
 }
 

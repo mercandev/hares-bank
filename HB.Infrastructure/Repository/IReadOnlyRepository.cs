@@ -21,6 +21,8 @@ namespace HB.Infrastructure.Repository
 
         Task<T> FindAsync(Expression<Func<T, bool>> match);
 
+        Task<List<T>> FindToListAsync();
+
         T Get(int id);
 
         Task<T> GetAsync(int id);

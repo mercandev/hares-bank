@@ -27,8 +27,8 @@ namespace HB.Api.Controllers
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.ALL_USERS)]
-        public ReturnState<object> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
-        => _paymentService.PostOnlinePaymentCheckCardInformation(model);
+        public async Task<ReturnState<object>> PostOnlinePaymentCheckCardInformation(PostCheckPaymentInformationViewModel model)
+        => await _paymentService.PostOnlinePaymentCheckCardInformation(model);
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.ALL_USERS)]
@@ -40,15 +40,10 @@ namespace HB.Api.Controllers
         public async Task<ReturnState<object>> PostCreateIbanTransfer(PostSendMoneyWithIbanViewModel model)
         => await _paymentService.CreateIbanTransfer(model);
 
-        [HttpGet]
-        [AuthHb(Roles = UserRoles.ALL_USERS)]
-        public ReturnState<object> GetOrganisations()
-        => _paymentService.GetOrganisations();
-
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public  ReturnState<object> PostPayInvoice(InvoicePaymentViewModel model)
-        => _paymentService.PostPayInvoice(HttpContext.GetCurrentUserId(), model);
+        public async Task<ReturnState<object>> PostPayInvoice(InvoicePaymentViewModel model)
+        => await _paymentService.PostPayInvoice(model);
 
     }
 }

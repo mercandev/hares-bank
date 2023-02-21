@@ -23,17 +23,17 @@ namespace HB.Service.Transaction
             this._transactionRepository = transactionRepository;
         }
 
-        public ReturnState<object> CreateTransaction(Transactions transaction)
+        public async Task<ReturnState<object>> CreateTransaction(Transactions transaction)
         {
-            _transactionRepository.Add(transaction);
+            await _transactionRepository.AddAsync(transaction);
             return new ReturnState<object>(HttpStatusCode.Created, data: true);
         }
 
-        public ReturnState<object> ListTransactionsByCustomerId(int customerId , DateTime startDate , DateTime endDate)
+        public async Task<ReturnState<object>> ListTransactionsByCustomerId(int customerId , DateTime startDate , DateTime endDate)
         {
-            var result = _transactionRepository.All()
-                .Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
-                .OrderByDescending(x => x.CreatedDate).ToList();
+            var result = await _transactionRepository
+                .All().Where(x => x.CustomerId == customerId && x.CreatedDate >= startDate && x.CreatedDate < endDate)
+                .OrderByDescending(x => x.CreatedDate).ToListAsync();
 
             if(result.Count <= 0)
             {

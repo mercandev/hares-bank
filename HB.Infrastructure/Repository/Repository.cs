@@ -146,6 +146,11 @@ namespace HB.Infrastructure.Repository
             return await Table.Where(match).ToListAsync();
         }
 
+        public async Task<List<T>> FindToListAsync()
+        {
+            return await Table.ToListAsync();
+        }
+
         public async Task<T> FindAllFirstOrDefaultAsync(Expression<Func<T, bool>> match)
         {
             return await Table.FirstOrDefaultAsync(match);

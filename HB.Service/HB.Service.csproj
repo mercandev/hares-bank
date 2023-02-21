@@ -45,6 +45,7 @@
     <None Remove="Account\" />
     <None Remove="CustomMapping\" />
     <None Remove="Process\" />
+    <None Remove="Organisation\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Marten" Version="6.0.0-alpha.6" />
@@ -72,5 +73,6 @@
     <Folder Include="Account\" />
     <Folder Include="CustomMapping\" />
     <Folder Include="Process\" />
+    <Folder Include="Organisation\" />
   </ItemGroup>
 </Project>

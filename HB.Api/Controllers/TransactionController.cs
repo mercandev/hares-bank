@@ -29,8 +29,8 @@ namespace HB.Api.Controllers
 
         [HttpPost]
         [AuthHb(Roles = UserRoles.CUSTOMER)]
-        public ReturnState<object> CustomerTransactions(CustomerTransactionsInputViewModel model)
-        => _transactionService.ListTransactionsByCustomerId(HttpContext.GetCurrentUserId() , model.StartDate , model.EndDate);
+        public async Task<ReturnState<object>> CustomerTransactions(CustomerTransactionsInputViewModel model)
+        => await _transactionService.ListTransactionsByCustomerId(HttpContext.GetCurrentUserId() , model.StartDate , model.EndDate);
     }
 }
 

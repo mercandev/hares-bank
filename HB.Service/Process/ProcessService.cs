@@ -90,7 +90,7 @@ namespace HB.Service.Process
             
             var transactions = CustomProcessMapping.GoldBuyyingTransaction(goldAccount, poundPrice, model.Price);
 
-            _transactionService.CreateTransaction(transactions);
+            await _transactionService.CreateTransaction(transactions);
 
             return new ReturnState<object>(true);
         }
