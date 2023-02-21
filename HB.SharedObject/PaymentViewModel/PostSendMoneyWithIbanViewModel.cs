@@ -18,6 +18,9 @@ namespace HB.SharedObject.PaymentViewModel
 
         [CustomHbValidation]
         public string UserNameAndSurname { get; set; }
-	}
+
+        [CustomHbValidation]
+        public int AccountId { get; set; }
+    }
 }
 

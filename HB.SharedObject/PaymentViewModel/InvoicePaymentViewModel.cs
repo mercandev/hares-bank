@@ -10,6 +10,9 @@ namespace HB.SharedObject.PaymentViewModel
 
         [CustomHbValidation]
         public int OrganisationId { get; set; }
-	}
+
+        [CustomHbValidation]
+        public int AccountId { get; set; }
+    }
 }
 

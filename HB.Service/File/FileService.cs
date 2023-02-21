@@ -37,7 +37,7 @@ namespace HB.Service.File
 
             var transactions = await FindTransaction(transactionsId);
 
-            if (transactions is null)
+            if (transactions is null || transactions.ReceiptInformation is null)
             {
                 return new ReturnState<object>(HttpStatusCode.NotAcceptable, "Transaction not found!");
             }

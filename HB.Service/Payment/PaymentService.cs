@@ -57,7 +57,7 @@ namespace HB.Service.Payment
         {
             PaymentHelper.IbanValidation(model.Iban);
 
-            var userInformation = _accountsRepository.All().Where(x => x.CustomersId == _authUserInformation.CustomerId)
+            var userInformation = _accountsRepository.All().Where(x => x.CustomersId == _authUserInformation.CustomerId && x.Id == model.AccountId)
                 .Include("Customers").FirstOrDefault();
 
             if (userInformation is null)
@@ -144,7 +144,7 @@ namespace HB.Service.Payment
         public async Task<ReturnState<object>> PostPayInvoice(InvoicePaymentViewModel model)
         {
             var accountInformation = _accountsRepository.All().Include("Customers")
-                .FirstOrDefault(x => x.CustomersId == _authUserInformation.CustomerId);
+                .FirstOrDefault(x => x.CustomersId == _authUserInformation.CustomerId && x.Id == model.AccountId);
 
             if (accountInformation is null)
             {
